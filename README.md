@@ -1,7 +1,14 @@
-# Tauri + React
+# Code Editor
 
-This template should help get you started developing with Tauri and React in Vite.
+A simple lightweight code editor made with tauri, rust and react
 
-## Recommended IDE Setup
+### Todo
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- [ ] Create a right click context window for files and directories to allow for tasks such as delete, renaming etc (backed end rust code is complete)
+- [ ] Fix: WatchDir watches the '.' directory and I have not figured out a way to switch the directory that is being watched (you must click rewind button to refresh folder structure on frontend).
+- [ ] Add error checking to all rust functions
+- [ ] Implement kanban board in side panel
+- [ ] Break up code into multiple components on the front end
+- [ ] Add more keyboard shortcuts
+- [ ] Implement git feature on front end (back end rust code is complete)
+- [ ] Improve code quality
