@@ -2,6 +2,8 @@
 
 A simple lightweight code editor made with tauri, rust and react
 
+![alt text](https://raw.githubusercontent.com/mukulve/Code-Editor/main/screenshots/1.png)
+
 ### Todo
 
 - [ ] Create a right click context window for files and directories to allow for tasks such as delete, renaming etc (backed end rust code is complete)
