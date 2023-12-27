@@ -6,7 +6,7 @@ A simple lightweight code editor made with tauri, rust and react
 
 ### Todo
 
-- [ ] Create a right click context window for files and directories to allow for tasks such as delete, renaming etc (backed end rust code is complete)
+- [x] Create a right click context window for files and directories to allow for tasks such as delete, renaming etc (backed end rust code is complete)
 - [ ] Fix: WatchDir watches the '.' directory and I have not figured out a way to switch the directory that is being watched (you must click rewind button to refresh folder structure on frontend).
 - [ ] Add error checking to all rust functions
 - [ ] Implement kanban board in side panel
