@@ -106,9 +106,6 @@ fn gitClone(src: String) {
         .arg(src)
         .output()
         .expect("failed to execute process");
-    println!("status: {}", output.status);
-    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
 }
 
 #[tauri::command]
@@ -117,9 +114,6 @@ fn gitInit() {
         .arg("init")
         .output()
         .expect("failed to execute process");
-    println!("status: {}", output.status);
-    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
 }
 
 #[tauri::command]
@@ -130,9 +124,6 @@ fn gitCommit(message: String) {
         .arg(message)
         .output()
         .expect("failed to execute process");
-    println!("status: {}", output.status);
-    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
 }
 
 #[tauri::command]
@@ -144,9 +135,16 @@ fn gitPush() {
         .arg("master")
         .output()
         .expect("failed to execute process");
-    println!("status: {}", output.status);
-    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+}
+
+#[tauri::command]
+fn runTerminalCommand(command: String, path: String) -> Result<String, String> {
+    let output = std::process::Command::new(command)
+        .current_dir(path)
+        .output()
+        .expect("failed to execute process");
+
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
 #[tauri::command]
@@ -191,13 +189,9 @@ fn emitEvent(app: tauri::AppHandle, event: &str, payload: &str) {
 
 //use notify to watch for changes in a directory
 fn watchDirectory(app: tauri::AppHandle) {
-    println!("watching directory");
     let mut watcher =
         notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| match res {
             Ok(event) => {
-                println!("event: {:?}", event.kind);
-                println!("path: {:?}", event.paths);
-                println!("");
                 if event.kind.is_create() || event.kind.is_remove() {
                     emitEvent(app.clone(), "file-changed", "file changed");
                 }
@@ -208,7 +202,6 @@ fn watchDirectory(app: tauri::AppHandle) {
 
     thread::spawn(move || {
         let path = WORKINGDIR.lock().unwrap().clone();
-        println!("watching: {}", path);
         watcher
             .watch(Path::new(&path), RecursiveMode::Recursive)
             .unwrap();
@@ -242,7 +235,8 @@ fn main() {
             removeDirectoryAndContents,
             copyFile,
             writeToFile,
-            setWorkingDirectory
+            setWorkingDirectory,
+            runTerminalCommand
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

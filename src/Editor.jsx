@@ -4,6 +4,8 @@ import EditorContext from "./EditorContext";
 
 import CodeEditor from "@uiw/react-textarea-code-editor";
 
+import Terminal from "./Terminal";
+
 import { Button, ButtonGroup } from "@nextui-org/react";
 import { Breadcrumbs, BreadcrumbItem } from "@nextui-org/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -83,7 +85,7 @@ export default function Editor() {
   }
 
   return (
-    <main className="w-full">
+    <main className="w-full relative ">
       <ButtonGroup size="sm" className="bg-background">
         {openFiles.map((child, i) => (
           <Button
@@ -113,6 +115,7 @@ export default function Editor() {
           ))}
       </Breadcrumbs>
       <div
+        className="pb-32"
         style={{
           height: "calc(100vh - 65px)",
           maxHeight: "calc(100vh - 65px)",
@@ -128,6 +131,7 @@ export default function Editor() {
           onInput={(e) => updateFileContent(e)}
         />
       </div>
+      <Terminal />
     </main>
   );
 }

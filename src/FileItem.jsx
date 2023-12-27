@@ -1,62 +1,48 @@
 import { useContext, useState } from "react";
-import { useClickAway } from "@uidotdev/usehooks";
 import EditorContext from "./EditorContext";
+
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+} from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
+
+import { invoke } from "@tauri-apps/api/tauri";
 
 export default function FileItem({ file }) {
   const { openFile, openFiles } = useContext(EditorContext);
-  const [open, setOpen] = useState(false);
-  const [event, setEvent] = useState({});
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const ref = useClickAway(() => {
-    setOpen(false);
-  });
+  const [newName, setNewName] = useState(file.path);
+  const [newPath, setNewPath] = useState(file.path);
 
-  const handleOpenModal = () => {
-    if (open === false) {
-      setOpen(true);
-    }
-  };
-
-  function getIcon(filename) {
-    if (filename.endsWith(".js")) {
-      return "devicon-javascript-plain colored";
-    } else if (filename.endsWith(".py")) {
-      return "devicon-python-plain colored";
-    } else if (filename.endsWith(".html")) {
-      return "devicon-html5-plain colored";
-    } else if (filename.endsWith(".css")) {
-      return "devicon-css3-plain colored";
-    } else if (filename.endsWith(".java")) {
-      return "devicon-java-plain colored";
-    } else if (filename.endsWith(".php")) {
-      return "devicon-php-plain colored";
-    } else if (filename.endsWith(".c#")) {
-      return "devicon-csharp-plain colored";
-    } else if (filename.endsWith(".ruby")) {
-      return "devicon-ruby-plain colored";
-    } else if (filename.endsWith(".go")) {
-      return "devicon-go-plain colored";
-    } else if (filename.endsWith(".rs")) {
-      return "devicon-rust-plain colored";
-    } else if (filename.endsWith(".swift")) {
-      return "devicon-swift-plain colored";
-    } else if (filename.endsWith(".kotlin")) {
-      return "devicon-kotlin-plain colored";
-    } else if (filename.endsWith(".ts")) {
-      return "devicon-typescript-plain colored";
-    } else if (filename.endsWith(".sql")) {
-      return "devicon-mysql-plain colored";
-    } else if (filename.endsWith(".markdown")) {
-      return "devicon-markdown-plain colored";
-    } else if (filename.endsWith(".c")) {
-      return "devicon-c-plain colored";
-    } else if (filename.endsWith(".cpp")) {
-      return "devicon-cplusplus-plain colored";
-    } else {
-      return "devicon-file-plain colored";
-    }
+  async function renameFile() {
+    await invoke("renameOrMoveFileOrDirectory", {
+      path: file.path,
+      to: newName,
+    });
+    onOpenChange();
   }
-  const iconClass = getIcon(file.name);
+
+  async function moveFile() {
+    await invoke("renameOrMoveFileOrDirectory", {
+      path: file.path,
+      to: newPath,
+    });
+    onOpenChange();
+  }
+
+  async function deleteFile() {
+    await invoke("removeFile", {
+      path: file.path,
+    });
+    onOpenChange();
+  }
 
   return (
     <>
@@ -64,23 +50,52 @@ export default function FileItem({ file }) {
         className="ml-4 text-clip  text-sm whitespace-nowrap"
         onClick={() => openFile(file)}
         onContextMenu={(e) => {
-          //handleOpenModal();
-          //console.log(e);
-          //setEvent(e);
+          onOpen();
           e.preventDefault();
         }}
       >
-        {/**
-         * <i className={iconClass}></i>
-         */}
         {file.name}
       </li>
-      {open && (
-        <div
-          ref={ref}
-          className={`absolute bg-background z-50 top-[${event.pageX}px] left-[${event.pageY}px]`}
-        ></div>
-      )}
+
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                <h1 className="break-all">{file.path}</h1>
+              </ModalHeader>
+              <ModalBody>
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  size="sm"
+                  placeholder="New Name"
+                  endContent={
+                    <Button size="sm" onClick={renameFile}>
+                      Rename
+                    </Button>
+                  }
+                />
+                <Input
+                  value={newPath}
+                  onChange={(e) => setNewPath(e.target.value)}
+                  size="sm"
+                  placeholder="New Path"
+                  endContent={
+                    <Button size="sm" onClick={moveFile}>
+                      Move File
+                    </Button>
+                  }
+                />
+                <Button size="sm" onClick={deleteFile}>
+                  Delete
+                </Button>
+              </ModalBody>
+              <ModalFooter></ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </>
   );
 }

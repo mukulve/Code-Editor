@@ -28,17 +28,7 @@ import { listen } from "@tauri-apps/api/event";
 import FileItem from "./FileItem";
 
 function App() {
-  const {
-    openFolder,
-    currentPath,
-    setCurrentPath,
-    closeFile,
-    openFiles,
-    currentOpenFile,
-    setCurrentOpenFile,
-    setOpenFiles,
-    loading,
-  } = useContext(EditorContext);
+  const { openFolder, currentPath, setCurrentPath } = useContext(EditorContext);
 
   const [directory, setDirectory] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -140,36 +130,28 @@ function App() {
               {currentPath != null && (
                 <>
                   <ButtonGroup size="sm" className="bg-background">
-                    <Button
-                      isIconOnly
-                      className="bg-background"
-                      onClick={createNewFile}
-                    >
+                    <Button isIconOnly variant="light" onClick={createNewFile}>
                       <FontAwesomeIcon icon={faFile} />
                     </Button>
                     <Button
                       isIconOnly
-                      className="bg-background"
+                      variant="light"
                       onClick={createNewFolder}
                     >
                       <FontAwesomeIcon icon={faFolder} />
                     </Button>
-                    <Button isIconOnly className="bg-background">
+                    <Button isIconOnly variant="light">
                       <FontAwesomeIcon icon={faSearch} />
                     </Button>
 
                     <Button
                       isIconOnly
-                      className="bg-background"
+                      variant="light"
                       onClick={rereadDirecotry}
                     >
                       <FontAwesomeIcon icon={faRotateRight} />
                     </Button>
-                    <Button
-                      isIconOnly
-                      className="bg-background"
-                      onClick={readDirectory}
-                    >
+                    <Button isIconOnly variant="light" onClick={readDirectory}>
                       <FontAwesomeIcon icon={faPlus} />
                     </Button>
                   </ButtonGroup>
@@ -211,31 +193,36 @@ function App() {
             <div className="flex flex-col  items-start">
               <Button
                 size="sm"
-                className="bg-background text-clip font-semibold  "
+                variant="light"
+                className="text-clip font-semibold  "
               >
                 Git Clone
               </Button>
               <Button
                 size="sm"
-                className="bg-background text-clip font-semibold"
+                variant="light"
+                className="text-clip font-semibold  "
               >
                 Git Init
               </Button>
               <Button
                 size="sm"
-                className="bg-background text-clip font-semibold"
+                variant="light"
+                className="text-clip font-semibold  "
               >
                 Git Commit
               </Button>
               <Button
                 size="sm"
-                className="bg-background text-clip font-semibold"
+                variant="light"
+                className="text-clip font-semibold  "
               >
                 Git Push
               </Button>
               <Button
                 size="sm"
-                className="bg-background text-clip font-semibold"
+                variant="light"
+                className="text-clip font-semibold  "
               >
                 Remove Git Repo
               </Button>
