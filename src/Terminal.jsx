@@ -1,22 +1,23 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useState } from "react";
 
 import EditorContext from "./EditorContext";
-import { Input, Button, Kbd, Code } from "@nextui-org/react";
+import {
+  Input,
+  Button,
+  Kbd,
+  Tabs,
+  Tab,
+  Card,
+  CardBody,
+} from "@nextui-org/react";
 
 import { invoke } from "@tauri-apps/api/tauri";
 
 export default function Terminal() {
   const [terminalCommand, setTerminalCommand] = useState("");
   const [commandResult, setCommandResult] = useState([]);
-  const {
-    closeFile,
-    openFiles,
-    currentOpenFile,
-    setCurrentOpenFile,
-    setOpenFiles,
-    loading,
-    currentPath,
-  } = useContext(EditorContext);
+  const [log, setLog] = useState([]);
+  useContext(EditorContext);
 
   async function callTerminalCommand() {
     if (terminalCommand == "") return;
@@ -28,28 +29,61 @@ export default function Terminal() {
     setTerminalCommand("");
   }
 
+  async function getLog() {
+    let result = await invoke("getLogs", {});
+    setLog(result);
+  }
+
+  function convertTime(time) {
+    console.log(time);
+    //{nanos_since_epoch: 547497557, secs_since_epoch: 1703949777}
+    let date = new Date(time.secs_since_epoch * 1000);
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+    let milliseconds = time.nanos_since_epoch / 1000000;
+    let timeString =
+      hours + ":" + minutes + ":" + seconds + "." + milliseconds.toFixed(3);
+    return timeString;
+  }
+
   return (
-    <div className="absolute bottom-0 left-0 w-full h-32 bg-background p-2 ">
-      {commandResult.map((result) => (
-        <p className="mb-2 break-all">{result}</p>
-      ))}
-      <Input
-        fullWidth
-        size="sm"
-        startContent={<h1>$</h1>}
-        endContent={
-          <Button
+    <div className="absolute bottom-0 left-0 w-full h-32 bg-background p-2 overflow-y-auto">
+      <Tabs aria-label="Options" onSelectionChange={getLog} size="sm">
+        <Tab key="log" title="Log">
+          <div className="flex flex-col-reverse">
+            {log.map((result) => (
+              <p className="mb-2 break-all">
+                {convertTime(result.time)} {result.message}
+              </p>
+            ))}
+          </div>
+        </Tab>
+        <Tab key="terminal" title="Terminal">
+          <Input
+            fullWidth
             size="sm"
-            className="bg-background"
-            isIconOnly
-            onClick={callTerminalCommand}
-          >
-            <Kbd keys={["enter"]}></Kbd>
-          </Button>
-        }
-        placeholder="Terminal"
-        onChange={(e) => setTerminalCommand(e.target.value)}
-      />
+            startContent={<h1>$</h1>}
+            endContent={
+              <Button
+                size="sm"
+                className="bg-background"
+                isIconOnly
+                onClick={callTerminalCommand}
+              >
+                <Kbd keys={["enter"]}></Kbd>
+              </Button>
+            }
+            placeholder="Terminal"
+            onChange={(e) => setTerminalCommand(e.target.value)}
+          />
+          <div className="flex flex-col-reverse">
+            {commandResult.map((result) => (
+              <p className="mb-2 break-all">{result}</p>
+            ))}
+          </div>
+        </Tab>
+      </Tabs>
     </div>
   );
 }

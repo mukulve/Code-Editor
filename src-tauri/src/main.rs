@@ -1,3 +1,5 @@
+mod logging;
+
 use std::collections::HashSet;
 use std::io::Write;
 use std::path::Path;
@@ -23,28 +25,21 @@ use tauri::Manager;
 
 lazy_static! {
     static ref WORKINGDIR: Mutex<String> = Mutex::new(".".to_string());
+    static ref LOGS: Mutex<logging::Logs> = Mutex::new(logging::Logs { logs: Vec::new() });
 }
-
-/*
-
-#[derive(Default)]
-struct MyState {
-    s: std::sync::Mutex<String>,
-    t: std::sync::Mutex<Vec<tauri::api::dir::DiskEntry>>,
-}
-// remember to call `.manage(MyState::default())`
-
-fn ...( state: tauri::State<'_, MyState>)
-*/
 
 #[tauri::command]
 fn readDirectory(path: String) -> Result<Vec<tauri::api::dir::DiskEntry>, String> {
+    LOGS.lock().unwrap().addLog("Reading directory".to_string());
+
     *WORKINGDIR.lock().unwrap() = path.clone();
     Ok(read_dir(path, true).unwrap())
 }
 
 #[tauri::command]
 fn readFile(path: String) -> Result<String, String> {
+    LOGS.lock().unwrap().addLog("Reading file".to_string());
+
     let file = read_binary(path);
     let content = match file {
         Ok(lines) => String::from_utf8_lossy(&lines).to_string(),
@@ -56,6 +51,10 @@ fn readFile(path: String) -> Result<String, String> {
 #[cached]
 #[tauri::command]
 fn searchDirectoryForString(path: String, term: String) -> Result<HashSet<String>, String> {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Searching Directory".to_string());
+
     let result = Arc::new(Mutex::new(HashSet::new()));
     let file_paths: Vec<_> = Walk::new(path)
         .into_iter()
@@ -87,6 +86,8 @@ fn searchDirectoryForString(path: String, term: String) -> Result<HashSet<String
 
 #[tauri::command]
 fn gitClone(src: String) {
+    LOGS.lock().unwrap().addLog("Running git clone".to_string());
+
     let output = std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("clone")
@@ -97,6 +98,8 @@ fn gitClone(src: String) {
 
 #[tauri::command]
 fn gitInit() {
+    LOGS.lock().unwrap().addLog("Running git init".to_string());
+
     let output = std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("init")
@@ -106,6 +109,10 @@ fn gitInit() {
 
 #[tauri::command]
 fn gitCommit(message: String) {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Running git commit".to_string());
+
     let output = std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("commit")
@@ -117,6 +124,8 @@ fn gitCommit(message: String) {
 
 #[tauri::command]
 fn gitPush() {
+    LOGS.lock().unwrap().addLog("Running git push".to_string());
+
     let output = std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("push")
@@ -129,6 +138,10 @@ fn gitPush() {
 
 #[tauri::command]
 fn runTerminalCommand(command: String) -> Result<String, String> {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Running Terminal Command".to_string());
+
     let output = std::process::Command::new(command)
         .current_dir(WORKINGDIR.lock().unwrap().clone())
         .output()
@@ -139,52 +152,84 @@ fn runTerminalCommand(command: String) -> Result<String, String> {
 
 #[tauri::command]
 fn createDirectory(path: String) {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Creating directory".to_string());
+
     fs::create_dir(path).unwrap();
 }
 
 #[tauri::command]
 fn createFile(path: String) {
+    LOGS.lock().unwrap().addLog("Creating file".to_string());
+
     fs::File::create(path).unwrap();
 }
 
 #[tauri::command]
 fn copyFile(path: String, to: String) {
+    LOGS.lock().unwrap().addLog("Copying file".to_string());
+
     fs::copy(path, to).unwrap();
 }
 
 #[tauri::command]
 fn renameOrMoveFileOrDirectory(path: String, to: String) {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Renaming / moving file or directory".to_string());
+
     fs::rename(path, to).unwrap();
 }
 
 #[tauri::command]
 fn removeFile(path: String) {
+    LOGS.lock().unwrap().addLog("Removing file".to_string());
+
     fs::remove_file(path).unwrap();
 }
 
 #[tauri::command]
 fn removeDirectoryAndContents(path: String) {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Removing directory".to_string());
+
     fs::remove_dir_all(path).unwrap();
 }
 
 #[tauri::command]
 fn writeToFile(path: String, content: String) {
+    LOGS.lock().unwrap().addLog("Writing file".to_string());
+
     let mut file = fs::File::create(path).unwrap();
     file.write_all(content.as_bytes()).unwrap();
 }
 
 fn emitEvent(app: tauri::AppHandle, event: &str, payload: &str) {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Emitting tauri event".to_string());
+
     app.emit_all(event, payload).unwrap();
 }
 
 #[tauri::command]
 fn checkIfKanbanExists() -> bool {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Checking if kanban exists".to_string());
+
     let path = WORKINGDIR.lock().unwrap().clone();
     Path::new(&(path + "/mveditor/kanbanBoard.json")).exists()
 }
 
 #[tauri::command]
 fn writeKanbanBoardToFile(content: String) {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Writing kaban to file".to_string());
+
     let path = WORKINGDIR.lock().unwrap().clone();
     if checkIfKanbanExists() == false {
         fs::create_dir(&(path.clone() + "/mveditor/")).unwrap();
@@ -195,6 +240,8 @@ fn writeKanbanBoardToFile(content: String) {
 
 #[tauri::command]
 fn readKanbanBoardFromFile() -> Result<String, String> {
+    LOGS.lock().unwrap().addLog("Reading kaban".to_string());
+
     let path = WORKINGDIR.lock().unwrap().clone();
     let file = read_binary(&(path + "/mveditor/kanbanBoard.json"));
     let content = match file {
@@ -229,11 +276,17 @@ fn watchDirectory(app: tauri::AppHandle) {
     });
 }
 
+#[tauri::command]
+fn getLogs() -> Vec<logging::Log> {
+    LOGS.lock().unwrap().getLogs().to_vec()
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
             let app_handle = app.handle();
             watchDirectory(app_handle);
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -254,7 +307,8 @@ fn main() {
             runTerminalCommand,
             checkIfKanbanExists,
             writeKanbanBoardToFile,
-            readKanbanBoardFromFile
+            readKanbanBoardFromFile,
+            getLogs
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
