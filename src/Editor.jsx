@@ -12,6 +12,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { Code } from "@nextui-org/react";
 
+import { useElementSize } from "usehooks-ts";
+
 import { invoke } from "@tauri-apps/api/tauri";
 
 export default function Editor() {
@@ -60,6 +62,11 @@ export default function Editor() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const [buttonGroupRef, { width: buttonGroupW, height: buttonGroupH }] =
+    useElementSize();
+  const [breadCrumbsRef, { width: breadCrumbsW, height: breadCrumbsH }] =
+    useElementSize();
+
   if (currentPath == null) {
     return (
       <main className="flex justify-center items-center justify-items-center h-screen w-full">
@@ -85,13 +92,17 @@ export default function Editor() {
   }
 
   return (
-    <main className="w-full relative ">
-      <ButtonGroup size="sm" className="bg-background">
+    <main className="w-full relative overflow-auto">
+      <ButtonGroup
+        ref={buttonGroupRef}
+        size="sm"
+        className="bg-background overflow-x-auto max-w-full"
+      >
         {openFiles.map((child, i) => (
           <Button
             key={i}
             onClick={() => setCurrentOpenFile(i)}
-            className="bg-background"
+            className="bg-background shrink-0 "
             endContent={
               <Button
                 isIconOnly
@@ -106,7 +117,7 @@ export default function Editor() {
           </Button>
         ))}
       </ButtonGroup>
-      <Breadcrumbs isDisabled>
+      <Breadcrumbs isDisabled ref={breadCrumbsRef}>
         {openFiles[currentOpenFile].path
           .split("/")
           .slice(1)
@@ -115,17 +126,16 @@ export default function Editor() {
           ))}
       </Breadcrumbs>
       <div
-        className="pb-32"
+        className="relative pb-32 overflow-auto w-full"
         style={{
-          height: "calc(100vh - 65px)",
-          maxHeight: "calc(100vh - 65px)",
-          overflow: "auto",
+          height: `calc(100vh - ${breadCrumbsH + buttonGroupH}px)`,
+          maxHeight: `calc(100vh - ${breadCrumbsH + buttonGroupH}px)`,
         }}
       >
         <CodeEditor
           padding={15}
           language={openFiles[currentOpenFile].path.split(".").pop()}
-          className="bg-background text-base"
+          className="bg-background text-base "
           data-color-mode="light"
           value={openFiles[currentOpenFile].content}
           onInput={(e) => updateFileContent(e)}

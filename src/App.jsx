@@ -13,9 +13,9 @@ import { Divider } from "@nextui-org/react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faChartGantt,
   faCodeBranch,
   faCopy,
-  faEye,
   faFile,
   faFolder,
   faGear,
@@ -26,6 +26,7 @@ import {
 
 import { listen } from "@tauri-apps/api/event";
 import FileItem from "./FileItem";
+import KanbanBoard from "./KanbanBoard";
 
 function App() {
   const { openFolder, currentPath, setCurrentPath } = useContext(EditorContext);
@@ -34,6 +35,27 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [asideCurrentTab, setAsideCurrentTab] = useState(0);
+
+  const [gitCloneUrl, setGitCloneUrl] = useState("");
+  const [gitCommitMessage, setGitCommitMessage] = useState("");
+
+  async function gitClone() {
+    await invoke("gitClone", {
+      src: gitCloneUrl,
+    });
+  }
+
+  async function gitInit() {
+    await invoke("gitInit", {});
+  }
+
+  async function gitCommit() {
+    await invoke("gitCommit", { message: gitCommitMessage });
+  }
+
+  async function gitPush() {
+    await invoke("gitPush", {});
+  }
 
   async function readDirectory() {
     let folder = await openFolder();
@@ -79,7 +101,7 @@ function App() {
 
   return (
     <div className="flex gap-2">
-      <aside className="min-w-52 w-52 flex h-screen">
+      <aside className="min-w-60 w-60 flex h-screen">
         <div className="w-1/5 flex flex-col overflow-auto h-full gap-2">
           <button
             onClick={() => {
@@ -107,7 +129,7 @@ function App() {
               setAsideCurrentTab(3);
             }}
           >
-            <FontAwesomeIcon icon={faEye} />
+            <FontAwesomeIcon icon={faChartGantt} />
           </button>
           <button
             onClick={() => {
@@ -190,49 +212,51 @@ function App() {
             </>
           )}
           {asideCurrentTab === 2 && (
-            <div className="flex flex-col  items-start">
+            <div className="flex flex-col  items-start gap-2">
+              <Input
+                size="sm"
+                value={gitCloneUrl}
+                onValueChange={setGitCloneUrl}
+                placeholder="https://URL/USER/REPO.git"
+                endContent={
+                  <Button size="sm" onClick={gitClone}>
+                    Clone
+                  </Button>
+                }
+              />
+
+              <Input
+                size="sm"
+                value={gitCommitMessage}
+                onValueChange={setGitCommitMessage}
+                placeholder="Initial Commit"
+                endContent={
+                  <Button size="sm" onClick={gitCommit}>
+                    Commit
+                  </Button>
+                }
+              />
+
               <Button
                 size="sm"
                 variant="light"
                 className="text-clip font-semibold  "
-              >
-                Git Clone
-              </Button>
-              <Button
-                size="sm"
-                variant="light"
-                className="text-clip font-semibold  "
+                onClick={gitInit}
               >
                 Git Init
               </Button>
+
               <Button
                 size="sm"
                 variant="light"
                 className="text-clip font-semibold  "
-              >
-                Git Commit
-              </Button>
-              <Button
-                size="sm"
-                variant="light"
-                className="text-clip font-semibold  "
+                onClick={gitPush}
               >
                 Git Push
               </Button>
-              <Button
-                size="sm"
-                variant="light"
-                className="text-clip font-semibold  "
-              >
-                Remove Git Repo
-              </Button>
             </div>
           )}
-          {asideCurrentTab === 3 && (
-            <div>
-              <h1 className="text-clip font-semibold ">Preview</h1>
-            </div>
-          )}
+          {asideCurrentTab === 3 && <KanbanBoard />}
           {asideCurrentTab === 4 && (
             <div>
               <h1 className="text-clip font-semibold ">Settings</h1>

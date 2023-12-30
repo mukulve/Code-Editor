@@ -25,16 +25,6 @@ lazy_static! {
     static ref WORKINGDIR: Mutex<String> = Mutex::new(".".to_string());
 }
 
-#[derive(Default)]
-struct EditorState {
-    path: Mutex<String>,
-    folderStrucutre: Mutex<Vec<tauri::api::dir::DiskEntry>>,
-    globalSearchResults: Mutex<HashSet<String>>,
-    globalSearchResultsTerm: Mutex<String>,
-    isDirectory: Mutex<bool>,
-    isFile: Mutex<bool>,
-}
-
 /*
 
 #[derive(Default)]
@@ -46,10 +36,6 @@ struct MyState {
 
 fn ...( state: tauri::State<'_, MyState>)
 */
-#[tauri::command]
-fn setWorkingDirectory(path: String, state: tauri::State<'_, EditorState>) {
-    *state.path.lock().unwrap() = path;
-}
 
 #[tauri::command]
 fn readDirectory(path: String) -> Result<Vec<tauri::api::dir::DiskEntry>, String> {
@@ -102,6 +88,7 @@ fn searchDirectoryForString(path: String, term: String) -> Result<HashSet<String
 #[tauri::command]
 fn gitClone(src: String) {
     let output = std::process::Command::new("git")
+        .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("clone")
         .arg(src)
         .output()
@@ -111,6 +98,7 @@ fn gitClone(src: String) {
 #[tauri::command]
 fn gitInit() {
     let output = std::process::Command::new("git")
+        .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("init")
         .output()
         .expect("failed to execute process");
@@ -119,6 +107,7 @@ fn gitInit() {
 #[tauri::command]
 fn gitCommit(message: String) {
     let output = std::process::Command::new("git")
+        .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("commit")
         .arg("-m")
         .arg(message)
@@ -129,6 +118,7 @@ fn gitCommit(message: String) {
 #[tauri::command]
 fn gitPush() {
     let output = std::process::Command::new("git")
+        .current_dir(WORKINGDIR.lock().unwrap().clone())
         .arg("push")
         .arg("-u")
         .arg("origin")
@@ -138,9 +128,9 @@ fn gitPush() {
 }
 
 #[tauri::command]
-fn runTerminalCommand(command: String, path: String) -> Result<String, String> {
+fn runTerminalCommand(command: String) -> Result<String, String> {
     let output = std::process::Command::new(command)
-        .current_dir(path)
+        .current_dir(WORKINGDIR.lock().unwrap().clone())
         .output()
         .expect("failed to execute process");
 
@@ -187,6 +177,33 @@ fn emitEvent(app: tauri::AppHandle, event: &str, payload: &str) {
     app.emit_all(event, payload).unwrap();
 }
 
+#[tauri::command]
+fn checkIfKanbanExists() -> bool {
+    let path = WORKINGDIR.lock().unwrap().clone();
+    Path::new(&(path + "/mveditor/kanbanBoard.json")).exists()
+}
+
+#[tauri::command]
+fn writeKanbanBoardToFile(content: String) {
+    let path = WORKINGDIR.lock().unwrap().clone();
+    if checkIfKanbanExists() == false {
+        fs::create_dir(&(path.clone() + "/mveditor/")).unwrap();
+    }
+    let mut file = fs::File::create(&(path + "/mveditor/kanbanBoard.json")).unwrap();
+    file.write_all(content.as_bytes()).unwrap();
+}
+
+#[tauri::command]
+fn readKanbanBoardFromFile() -> Result<String, String> {
+    let path = WORKINGDIR.lock().unwrap().clone();
+    let file = read_binary(&(path + "/mveditor/kanbanBoard.json"));
+    let content = match file {
+        Ok(lines) => String::from_utf8_lossy(&lines).to_string(),
+        Err(_) => "".to_string(),
+    };
+    Ok(content)
+}
+
 //use notify to watch for changes in a directory
 fn watchDirectory(app: tauri::AppHandle) {
     let mut watcher =
@@ -219,7 +236,6 @@ fn main() {
             watchDirectory(app_handle);
             Ok(())
         })
-        .manage(EditorState::default())
         .invoke_handler(tauri::generate_handler![
             readDirectory,
             readFile,
@@ -235,8 +251,10 @@ fn main() {
             removeDirectoryAndContents,
             copyFile,
             writeToFile,
-            setWorkingDirectory,
-            runTerminalCommand
+            runTerminalCommand,
+            checkIfKanbanExists,
+            writeKanbanBoardToFile,
+            readKanbanBoardFromFile
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

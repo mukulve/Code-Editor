@@ -23,7 +23,6 @@ export default function Terminal() {
 
     let result = await invoke("runTerminalCommand", {
       command: terminalCommand,
-      path: currentPath,
     });
     setCommandResult((commandResult) => [...commandResult, result]);
     setTerminalCommand("");
