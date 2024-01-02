@@ -1,15 +1,7 @@
 import { useContext, useState } from "react";
 
 import EditorContext from "./EditorContext";
-import {
-  Input,
-  Button,
-  Kbd,
-  Tabs,
-  Tab,
-  Card,
-  CardBody,
-} from "@nextui-org/react";
+import { Input, Button, Kbd, Tabs, Tab } from "@nextui-org/react";
 
 import { invoke } from "@tauri-apps/api/tauri";
 
@@ -35,7 +27,6 @@ export default function Terminal() {
   }
 
   function convertTime(time) {
-    console.log(time);
     //{nanos_since_epoch: 547497557, secs_since_epoch: 1703949777}
     let date = new Date(time.secs_since_epoch * 1000);
     let hours = date.getHours();

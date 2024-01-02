@@ -1,4 +1,3 @@
-import FileItem from "./FileItem";
 import FileOrDirectory from "./FileOrDirectory";
 import { useState } from "react";
 

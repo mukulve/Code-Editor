@@ -9,7 +9,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import EditorContext from "./EditorContext";
 
 export default function KanbanBoard() {
-  const { openFolder, currentPath, setCurrentPath } = useContext(EditorContext);
+  const { currentPath } = useContext(EditorContext);
 
   const [
     backlogs,
@@ -46,10 +46,10 @@ export default function KanbanBoard() {
 
   async function writeKanban() {
     let kandbanJson = {
-      backlogs: backlogs,
-      todos: todos,
-      doings: doings,
-      dones: dones,
+      backlogs: backlogs.filter((x) => x != null && x != ""),
+      todos: todos.filter((x) => x != null && x != ""),
+      doings: doings.filter((x) => x != null && x != ""),
+      dones: dones.filter((x) => x != null && x != ""),
     };
 
     await invoke("writeKanbanBoardToFile", {
@@ -121,19 +121,21 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {backlogs.map((backlog, index) => (
-          <li key={index} className="flex justify-between">
-            {backlog}
-            <Button
-              isIconOnly
-              onClick={() => removeAtBacklog(index)}
-              color="light"
-              size="sm"
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </li>
-        ))}
+        {backlogs
+          .filter((x) => x != null && x != "")
+          .map((backlog, index) => (
+            <li key={index} className="flex justify-between">
+              {backlog}
+              <Button
+                isIconOnly
+                onClick={() => removeAtBacklog(index)}
+                color="light"
+                size="sm"
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            </li>
+          ))}
       </ul>
       <h1 className="text-clip font-semibold ">TODO</h1>
       <Input
@@ -148,19 +150,21 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {todos.map((todo, index) => (
-          <li key={index} className="flex justify-between">
-            {todo}
-            <Button
-              isIconOnly
-              onClick={() => removeAtTodo(index)}
-              color="light"
-              size="sm"
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </li>
-        ))}
+        {todos
+          .filter((x) => x != null && x != "")
+          .map((todo, index) => (
+            <li key={index} className="flex justify-between">
+              {todo}
+              <Button
+                isIconOnly
+                onClick={() => removeAtTodo(index)}
+                color="light"
+                size="sm"
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            </li>
+          ))}
       </ul>
       <h1 className="text-clip font-semibold ">Doing</h1>
       <Input
@@ -175,19 +179,21 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {doings.map((doing, index) => (
-          <li key={index} className="flex justify-between">
-            {doing}
-            <Button
-              isIconOnly
-              onClick={() => removeAtDoing(index)}
-              color="light"
-              size="sm"
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </li>
-        ))}
+        {doings
+          .filter((x) => x != null && x != "")
+          .map((doing, index) => (
+            <li key={index} className="flex justify-between">
+              {doing}
+              <Button
+                isIconOnly
+                onClick={() => removeAtDoing(index)}
+                color="light"
+                size="sm"
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            </li>
+          ))}
       </ul>
       <h1 className="text-clip font-semibold ">Done</h1>
       <Input
@@ -202,19 +208,21 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {dones.map((done, index) => (
-          <li key={index} className="flex justify-between">
-            {done}
-            <Button
-              isIconOnly
-              onClick={() => removeAtDone(index)}
-              color="light"
-              size="sm"
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </li>
-        ))}
+        {dones
+          .filter((x) => x != null && x != "")
+          .map((done, index) => (
+            <li key={index} className="flex justify-between">
+              {done}
+              <Button
+                isIconOnly
+                onClick={() => removeAtDone(index)}
+                color="light"
+                size="sm"
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            </li>
+          ))}
       </ul>
     </div>
   );

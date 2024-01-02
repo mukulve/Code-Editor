@@ -1,32 +1,24 @@
 import { useContext, useEffect, useRef } from "react";
-
 import EditorContext from "./EditorContext";
-
 import CodeEditor from "@uiw/react-textarea-code-editor";
-
 import Terminal from "./Terminal";
-
 import { Button, ButtonGroup } from "@nextui-org/react";
 import { Breadcrumbs, BreadcrumbItem } from "@nextui-org/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { Code } from "@nextui-org/react";
-
 import { useElementSize } from "usehooks-ts";
-
 import { invoke } from "@tauri-apps/api/tauri";
-
 import { useDarkMode } from "usehooks-ts";
 
 export default function Editor() {
-  const { isDarkMode, toggle, enable, disable } = useDarkMode();
+  const { isDarkMode } = useDarkMode();
 
   const {
     closeFile,
     openFiles,
     currentOpenFile,
     setCurrentOpenFile,
-    setOpenFiles,
     loading,
     currentPath,
   } = useContext(EditorContext);
@@ -66,10 +58,8 @@ export default function Editor() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const [buttonGroupRef, { width: buttonGroupW, height: buttonGroupH }] =
-    useElementSize();
-  const [breadCrumbsRef, { width: breadCrumbsW, height: breadCrumbsH }] =
-    useElementSize();
+  const [buttonGroupRef, { height: buttonGroupH }] = useElementSize();
+  const [breadCrumbsRef, { height: breadCrumbsH }] = useElementSize();
 
   if (currentPath == null) {
     return (
