@@ -16,7 +16,11 @@ import { useElementSize } from "usehooks-ts";
 
 import { invoke } from "@tauri-apps/api/tauri";
 
+import { useDarkMode } from "usehooks-ts";
+
 export default function Editor() {
+  const { isDarkMode, toggle, enable, disable } = useDarkMode();
+
   const {
     closeFile,
     openFiles,
@@ -136,7 +140,7 @@ export default function Editor() {
           padding={15}
           language={openFiles[currentOpenFile].path.split(".").pop()}
           className="bg-background text-base "
-          data-color-mode="light"
+          data-color-mode={isDarkMode ? "dark" : "light"}
           value={openFiles[currentOpenFile].content}
           onInput={(e) => updateFileContent(e)}
         />

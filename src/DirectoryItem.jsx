@@ -21,8 +21,10 @@ import {
 import { Input } from "@nextui-org/react";
 
 import { invoke } from "@tauri-apps/api/tauri";
+import { useDarkMode } from "usehooks-ts";
 
 export default function DirectoryItem({ directory }) {
+  const { isDarkMode, toggle, enable, disable } = useDarkMode();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [open, setOpen] = useState(false);
 
@@ -82,7 +84,21 @@ export default function DirectoryItem({ directory }) {
           )}
         </div>
       </li>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        classNames={{
+          body: `${
+            isDarkMode ? "dark" : ""
+          } bg-background text-foreground flex flex-col gap-10 justify-center items-center`,
+          base: `${isDarkMode ? "dark" : ""} bg-background text-foreground`,
+          header: `${isDarkMode ? "dark" : ""} bg-background text-foreground`,
+          footer: `${isDarkMode ? "dark" : ""} bg-background text-foreground`,
+          closeButton: `${
+            isDarkMode ? "dark" : ""
+          } bg-background text-foreground`,
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>

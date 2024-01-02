@@ -28,8 +28,12 @@ import { listen } from "@tauri-apps/api/event";
 import FileItem from "./FileItem";
 import KanbanBoard from "./KanbanBoard";
 
+import { Switch } from "@nextui-org/react";
+import { useDarkMode } from "usehooks-ts";
+
 function App() {
   const { openFolder, currentPath, setCurrentPath } = useContext(EditorContext);
+  const { isDarkMode, toggle, enable, disable } = useDarkMode();
 
   const [directory, setDirectory] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
@@ -260,6 +264,14 @@ function App() {
           {asideCurrentTab === 4 && (
             <div>
               <h1 className="text-clip font-semibold ">Settings</h1>
+              <div className="flex justify-between">
+                <h1 className="text-clip font-semibold ">Dark Mode</h1>
+                <Switch
+                  size="sm"
+                  onClick={toggle}
+                  defaultSelected={isDarkMode}
+                />
+              </div>
               <Divider className="my-4" />
               <h1>Made by Mukul with Tauri, Rust, React</h1>
             </div>

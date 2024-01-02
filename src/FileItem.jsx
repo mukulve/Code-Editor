@@ -12,9 +12,13 @@ import {
 } from "@nextui-org/react";
 import { Input } from "@nextui-org/react";
 
+import { useDarkMode } from "usehooks-ts";
+
 import { invoke } from "@tauri-apps/api/tauri";
 
 export default function FileItem({ file }) {
+  const { isDarkMode, toggle, enable, disable } = useDarkMode();
+
   const { openFile, openFiles } = useContext(EditorContext);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -57,7 +61,21 @@ export default function FileItem({ file }) {
         {file.name}
       </li>
 
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        classNames={{
+          body: `${
+            isDarkMode ? "dark" : ""
+          } bg-background text-foreground flex flex-col gap-10 justify-center items-center`,
+          base: `${isDarkMode ? "dark" : ""} bg-background text-foreground`,
+          header: `${isDarkMode ? "dark" : ""} bg-background text-foreground`,
+          footer: `${isDarkMode ? "dark" : ""} bg-background text-foreground`,
+          closeButton: `${
+            isDarkMode ? "dark" : ""
+          } bg-background text-foreground`,
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
