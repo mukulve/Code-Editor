@@ -13,3 +13,5 @@ A simple lightweight code editor made with tauri, rust and react
 - [x] Break up code into multiple components on the front end
 - [x] Add more keyboard shortcuts
 - [x] Implement git feature on front end (back end rust code is complete)
+
+### Icon generated with [DALL·E](https://labs.openai.com/)
