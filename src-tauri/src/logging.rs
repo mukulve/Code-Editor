@@ -13,7 +13,7 @@ impl Logs {
     pub fn addLog(&mut self, content: String) {
         let time = SystemTime::now();
         let log = Log {
-            time: time,
+            time,
             message: content,
         };
         self.logs.push(log);

@@ -2,9 +2,11 @@ import EditorContext from "./EditorContext";
 import { invoke } from "@tauri-apps/api/tauri";
 import { open } from "@tauri-apps/api/dialog";
 import { appDir } from "@tauri-apps/api/path";
-import { useState, useEffect } from "react";
+import { useState, useContext } from "react";
+import ErrorContext from "./ErrorContext";
 
 function EditorProvider({ children }) {
+  const { setError } = useContext(ErrorContext);
   const [openFiles, setOpenFiles] = useState([]);
   const [currentOpenFile, setCurrentOpenFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -34,14 +36,18 @@ function EditorProvider({ children }) {
       }
     }
 
-    setLoading(true);
-    let fileContent = await invoke("readFile", { path: file.path });
-    setOpenFiles((openFiles) => [
-      ...openFiles,
-      { path: file.path, content: fileContent, name: file.name },
-    ]);
-    setCurrentOpenFile(openFiles.length);
-    setLoading(false);
+    try {
+      setLoading(true);
+      let fileContent = await invoke("readFile", { path: file.path });
+      setOpenFiles((openFiles) => [
+        ...openFiles,
+        { path: file.path, content: fileContent, name: file.name },
+      ]);
+      setCurrentOpenFile(openFiles.length);
+      setLoading(false);
+    } catch (e) {
+      setError(e);
+    }
   }
 
   function closeFile(index) {

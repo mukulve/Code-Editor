@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 
 import EditorContext from "./EditorContext";
-
+import ErrorContext from "./ErrorContext";
 import { invoke } from "@tauri-apps/api/tauri";
 
 import FileOrDirectory from "./FileOrDirectory";
@@ -18,27 +18,44 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function FolderStructure() {
+  const { setError } = useContext(ErrorContext);
   const { openFolder, currentPath, setCurrentPath } = useContext(EditorContext);
   const [directory, setDirectory] = useState([]);
 
   async function readDirectory() {
-    let folder = await openFolder();
-    if (folder != null) {
-      setCurrentPath(folder);
-      setDirectory(await invoke("readDirectory", { path: folder }));
+    try {
+      let folder = await openFolder();
+      if (folder != null) {
+        setCurrentPath(folder);
+        setDirectory(await invoke("readDirectory", { path: folder }));
+      }
+    } catch (e) {
+      setError(e);
     }
   }
 
   async function rereadDirecotry() {
-    setDirectory(await invoke("readDirectory", { path: currentPath }));
+    try {
+      setDirectory(await invoke("readDirectory", { path: currentPath }));
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function createNewFile() {
-    await invoke("createFile", { path: currentPath + "/newFile.txt" });
+    try {
+      await invoke("createFile", { path: currentPath + "/newFile.txt" });
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function createNewFolder() {
-    await invoke("createDirectory", { path: currentPath + "/newFolder" });
+    try {
+      await invoke("createDirectory", { path: currentPath + "/newFolder" });
+    } catch (e) {
+      setError(e);
+    }
   }
 
   const FolderMapper = ({ data }) => (

@@ -22,7 +22,12 @@ import { Input } from "@nextui-org/react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { useDarkMode } from "usehooks-ts";
 
+import { useContext } from "react";
+import ErrorContext from "./ErrorContext";
+
 export default function DirectoryItem({ directory }) {
+  const { setError } = useContext(ErrorContext);
+
   const { isDarkMode, toggle, enable, disable } = useDarkMode();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [open, setOpen] = useState(false);
@@ -31,27 +36,40 @@ export default function DirectoryItem({ directory }) {
   const [newPath, setNewPath] = useState(directory.path);
 
   async function renameDirectory() {
-    await invoke("renameOrMoveFileOrDirectory", {
-      path: directory.path,
-      to: newName,
-    });
-    onOpenChange();
+    try {
+      await invoke("renameOrMoveFileOrDirectory", {
+        path: directory.path,
+        to: newName,
+      });
+      onOpenChange();
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function moveDirectory() {
-    await invoke("renameOrMoveFileOrDirectory", {
-      path: directory.path,
-      to: newPath,
-    });
-    onOpenChange();
+    try {
+      await invoke("renameOrMoveFileOrDirectory", {
+        path: directory.path,
+        to: newPath,
+      });
+      onOpenChange();
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function deleteDirectory() {
-    await invoke("removeDirectoryAndContents", {
-      path: directory.path,
-    });
-    onOpenChange();
+    try {
+      await invoke("removeDirectoryAndContents", {
+        path: directory.path,
+      });
+      onOpenChange();
+    } catch (e) {
+      setError(e);
+    }
   }
+
   return (
     <>
       <li>

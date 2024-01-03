@@ -1,26 +1,45 @@
 import { useState, useContext } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Input, Button } from "@nextui-org/react";
+import ErrorContext from "./ErrorContext";
+
 export default function Git() {
   const [gitCloneUrl, setGitCloneUrl] = useState("");
   const [gitCommitMessage, setGitCommitMessage] = useState("");
+  const { setError } = useContext(ErrorContext);
 
   async function gitClone() {
-    await invoke("gitClone", {
-      src: gitCloneUrl,
-    });
+    try {
+      await invoke("gitClone", {
+        src: gitCloneUrl,
+      });
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function gitInit() {
-    await invoke("gitInit", {});
+    try {
+      await invoke("gitInit", {});
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function gitCommit() {
-    await invoke("gitCommit", { message: gitCommitMessage });
+    try {
+      await invoke("gitCommit", { message: gitCommitMessage });
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function gitPush() {
-    await invoke("gitPush", {});
+    try {
+      await invoke("gitPush", {});
+    } catch (e) {
+      setError(e);
+    }
   }
 
   return (

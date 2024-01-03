@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 
-import EditorContext from "./EditorContext";
+import ErrorContext from "./ErrorContext";
 import { Input, Button, Kbd, Tabs, Tab } from "@nextui-org/react";
 
 import { invoke } from "@tauri-apps/api/tauri";
@@ -9,16 +9,20 @@ export default function Terminal() {
   const [terminalCommand, setTerminalCommand] = useState("");
   const [commandResult, setCommandResult] = useState([]);
   const [log, setLog] = useState([]);
-  useContext(EditorContext);
+  const { setError } = useContext(ErrorContext);
 
   async function callTerminalCommand() {
     if (terminalCommand == "") return;
 
-    let result = await invoke("runTerminalCommand", {
-      command: terminalCommand,
-    });
-    setCommandResult((commandResult) => [...commandResult, result]);
-    setTerminalCommand("");
+    try {
+      let result = await invoke("runTerminalCommand", {
+        command: terminalCommand,
+      });
+      setCommandResult((commandResult) => [...commandResult, result]);
+      setTerminalCommand("");
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function getLog() {
@@ -43,8 +47,8 @@ export default function Terminal() {
       <Tabs aria-label="Options" onSelectionChange={getLog} size="sm">
         <Tab key="log" title="Log">
           <div className="flex flex-col-reverse">
-            {log.map((result) => (
-              <p className="mb-2 break-all">
+            {log.map((result, i) => (
+              <p className="mb-2 break-all" key={i}>
                 {convertTime(result.time)} {result.message}
               </p>
             ))}
@@ -69,8 +73,10 @@ export default function Terminal() {
             onChange={(e) => setTerminalCommand(e.target.value)}
           />
           <div className="flex flex-col-reverse">
-            {commandResult.map((result) => (
-              <p className="mb-2 break-all">{result}</p>
+            {commandResult.map((result, i) => (
+              <p className="mb-2 break-all" key={i}>
+                {result}
+              </p>
             ))}
           </div>
         </Tab>

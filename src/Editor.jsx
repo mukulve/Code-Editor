@@ -48,9 +48,14 @@ export default function Editor() {
           path: openFilesRef.current[currentOpenFileRef.current].path,
           content: openFilesRef.current[currentOpenFileRef.current].content,
         });
-        console.log(
-          "saved" + openFilesRef.current[currentOpenFileRef.current].content
+      } else if ((event.ctrlKey || event.metaKey) && charCode === "\t") {
+        event.preventDefault();
+        setCurrentOpenFile(
+          currentOpenFileRef.current + 1 >= openFilesRef.current.length
+            ? 0
+            : currentOpenFileRef.current + 1
         );
+        console.log(currentOpenFile);
       }
     }
 

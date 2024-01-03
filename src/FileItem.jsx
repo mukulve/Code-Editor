@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import EditorContext from "./EditorContext";
-
+import ErrorContext from "./ErrorContext";
 import {
   Modal,
   ModalContent,
@@ -18,7 +18,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 export default function FileItem({ file }) {
   const { isDarkMode, toggle, enable, disable } = useDarkMode();
-
+  const { setError } = useContext(ErrorContext);
   const { openFile, openFiles } = useContext(EditorContext);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -26,26 +26,38 @@ export default function FileItem({ file }) {
   const [newPath, setNewPath] = useState(file.path);
 
   async function renameFile() {
-    await invoke("renameOrMoveFileOrDirectory", {
-      path: file.path,
-      to: newName,
-    });
-    onOpenChange();
+    try {
+      await invoke("renameOrMoveFileOrDirectory", {
+        path: file.path,
+        to: newName,
+      });
+      onOpenChange();
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function moveFile() {
-    await invoke("renameOrMoveFileOrDirectory", {
-      path: file.path,
-      to: newPath,
-    });
-    onOpenChange();
+    try {
+      await invoke("renameOrMoveFileOrDirectory", {
+        path: file.path,
+        to: newPath,
+      });
+      onOpenChange();
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function deleteFile() {
-    await invoke("removeFile", {
-      path: file.path,
-    });
-    onOpenChange();
+    try {
+      await invoke("removeFile", {
+        path: file.path,
+      });
+      onOpenChange();
+    } catch (e) {
+      setError(e);
+    }
   }
 
   return (

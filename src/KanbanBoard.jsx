@@ -5,11 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 import { invoke } from "@tauri-apps/api/tauri";
+import ErrorContext from "./ErrorContext";
 
 import EditorContext from "./EditorContext";
 
 export default function KanbanBoard() {
   const { currentPath } = useContext(EditorContext);
+  const { setError } = useContext(ErrorContext);
 
   const [
     backlogs,
@@ -52,21 +54,27 @@ export default function KanbanBoard() {
       dones: dones.filter((x) => x != null && x != ""),
     };
 
-    await invoke("writeKanbanBoardToFile", {
-      content: JSON.stringify(kandbanJson),
-    });
+    try {
+      await invoke("writeKanbanBoardToFile", {
+        content: JSON.stringify(kandbanJson),
+      });
+    } catch (e) {
+      setError(e);
+    }
   }
 
   async function readKanban() {
-    console.log("Reading Kanban");
-    let result = await invoke("readKanbanBoardFromFile", {});
-    console.log(result);
-    if (result) {
-      let kanbanJson = JSON.parse(result);
-      insetAtBacklog(0, ...kanbanJson.backlogs);
-      insetAtTodo(0, ...kanbanJson.todos);
-      insetAtDoing(0, ...kanbanJson.doings);
-      insetAtDone(0, ...kanbanJson.dones);
+    try {
+      let result = await invoke("readKanbanBoardFromFile", {});
+      if (result) {
+        let kanbanJson = JSON.parse(result);
+        insetAtBacklog(0, ...kanbanJson.backlogs);
+        insetAtTodo(0, ...kanbanJson.todos);
+        insetAtDoing(0, ...kanbanJson.doings);
+        insetAtDone(0, ...kanbanJson.dones);
+      }
+    } catch (e) {
+      setError(e);
     }
   }
 
