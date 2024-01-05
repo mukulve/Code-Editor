@@ -118,7 +118,7 @@ export default function Editor() {
       </ButtonGroup>
       <Breadcrumbs isDisabled ref={breadCrumbsRef}>
         {openFiles[currentOpenFile].path
-          .split("/")
+          .split(/[\/\\]/)
           .slice(1)
           .map((item, i) => (
             <BreadcrumbItem key={i}>{item}</BreadcrumbItem>

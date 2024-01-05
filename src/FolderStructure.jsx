@@ -1,13 +1,9 @@
-import { useState, useContext } from "react";
-
+import { useState, useContext, useEffect, useCallback, useRef } from "react";
 import EditorContext from "./EditorContext";
 import ErrorContext from "./ErrorContext";
 import { invoke } from "@tauri-apps/api/tauri";
-
 import FileOrDirectory from "./FileOrDirectory";
-
 import { Button, ButtonGroup } from "@nextui-org/react";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFile,
@@ -16,13 +12,20 @@ import {
   faRotateRight,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
+import { listen } from "@tauri-apps/api/event";
+import { debounce } from "lodash";
 
 export default function FolderStructure() {
   const { setError } = useContext(ErrorContext);
   const { openFolder, currentPath, setCurrentPath } = useContext(EditorContext);
   const [directory, setDirectory] = useState([]);
+  const [readingDirectory, setReadingDirectory] = useState(false);
+
+  const currentPathRef = useRef();
+  currentPathRef.current = currentPath;
 
   async function readDirectory() {
+    setReadingDirectory(true);
     try {
       let folder = await openFolder();
       if (folder != null) {
@@ -32,15 +35,25 @@ export default function FolderStructure() {
     } catch (e) {
       setError(e);
     }
+    setReadingDirectory(false);
   }
 
   async function rereadDirecotry() {
+    console.log(currentPathRef.current);
+    setReadingDirectory(true);
     try {
-      setDirectory(await invoke("readDirectory", { path: currentPath }));
+      setDirectory(
+        await invoke("readDirectory", { path: currentPathRef.current })
+      );
     } catch (e) {
       setError(e);
     }
+    setReadingDirectory(false);
   }
+
+  useEffect(() => {
+    if (currentPath != null) rereadDirecotry();
+  }, []);
 
   async function createNewFile() {
     try {
@@ -65,6 +78,17 @@ export default function FolderStructure() {
       ))}
     </ul>
   );
+
+  const debouncedReadDirectory = useCallback(
+    debounce(() => {
+      console.log("event");
+      rereadDirecotry();
+      //readDirectory();
+    }, 2000),
+    []
+  );
+
+  listen("file-changed", debouncedReadDirectory);
 
   if (currentPath == null) {
     return (

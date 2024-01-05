@@ -4,7 +4,7 @@ mod logging;
 use std::collections::HashSet;
 use std::io::Write;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::{mpsc, Arc, Mutex};
 
 use std::{fs, thread};
 
@@ -13,7 +13,6 @@ use rayon::prelude::*;
 use ignore::Walk;
 
 use cached::proc_macro::cached;
-use tokio::task::block_in_place;
 
 use notify::{RecursiveMode, Watcher};
 
@@ -27,6 +26,7 @@ use tauri::Manager;
 lazy_static! {
     static ref WORKINGDIR: Mutex<String> = Mutex::new(".".to_string());
     static ref LOGS: Mutex<logging::Logs> = Mutex::new(logging::Logs { logs: Vec::new() });
+    static ref APPHANDLE: Mutex<Option<tauri::AppHandle>> = Mutex::new(None);
 }
 
 #[tauri::command]
@@ -262,26 +262,27 @@ fn readKanbanBoardFromFile() -> Result<String, String> {
 
 //use notify to watch for changes in a directory
 fn watchDirectory(app: tauri::AppHandle) {
+    LOGS.lock()
+        .unwrap()
+        .addLog("Watching directory for changes".to_string());
+
     let mut watcher =
         notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| match res {
-            Ok(event) => {
-                if event.kind.is_create() || event.kind.is_remove() {
-                    emitEvent(app.clone(), "file-changed", "file changed");
-                }
+            Ok(_) => {
+                emitEvent(app.clone(), "file-changed", "file changed").unwrap();
             }
-            Err(e) => println!("watch error: {:?}", e),
+            Err(_) => {}
         })
         .unwrap();
 
-    thread::spawn(move || {
+    thread::spawn(move || loop {
         let path = WORKINGDIR.lock().unwrap().clone();
         watcher
             .watch(Path::new(&path), RecursiveMode::Recursive)
             .unwrap();
 
-        block_in_place(|| loop {
-            thread::park();
-        });
+        thread::sleep(std::time::Duration::from_secs(1));
+        watcher.unwatch(Path::new(&path)).unwrap_or(());
     });
 }
 
@@ -294,6 +295,7 @@ fn main() {
     tauri::Builder::default()
         .setup(|app| {
             let app_handle = app.handle();
+            APPHANDLE.lock().unwrap().replace(app_handle.clone());
             watchDirectory(app_handle);
 
             Ok(())

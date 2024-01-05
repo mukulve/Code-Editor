@@ -8,15 +8,13 @@ import EditorProvider from "./EditorProvider";
 import ErrorProvider from "./ErrorProvider";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <NextUIProvider>
-      <DarkModeProvider>
-        <EditorProvider>
-          <ErrorProvider>
-            <App />
-          </ErrorProvider>
-        </EditorProvider>
-      </DarkModeProvider>
-    </NextUIProvider>
-  </React.StrictMode>
+  <NextUIProvider>
+    <DarkModeProvider>
+      <EditorProvider>
+        <ErrorProvider>
+          <App />
+        </ErrorProvider>
+      </EditorProvider>
+    </DarkModeProvider>
+  </NextUIProvider>
 );

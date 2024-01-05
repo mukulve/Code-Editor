@@ -25,6 +25,9 @@ import { useDarkMode } from "usehooks-ts";
 import { useContext } from "react";
 import ErrorContext from "./ErrorContext";
 
+import default_folder from "./assets/default_folder.svg";
+import default_folder_opened from "./assets/default_folder_opened.svg";
+
 export default function DirectoryItem({ directory }) {
   const { setError } = useContext(ErrorContext);
 
@@ -74,18 +77,29 @@ export default function DirectoryItem({ directory }) {
     <>
       <li>
         <Button
+          disableRipple
+          disableAnimation
           onClick={() => setOpen(!open)}
           onContextMenu={(e) => {
             onOpen();
             e.preventDefault();
           }}
           size="sm"
-          className="bg-background text-clip font-semibold"
+          className="bg-background text-clip font-semibold overflow-clip"
           startContent={
             open ? (
-              <FontAwesomeIcon icon={faChevronDown} />
+              <>
+                <FontAwesomeIcon icon={faChevronDown} />
+                <img
+                  src={default_folder_opened}
+                  className="inline-block w-4 h-4"
+                />
+              </>
             ) : (
-              <FontAwesomeIcon icon={faChevronRight} />
+              <>
+                <FontAwesomeIcon icon={faChevronRight} />
+                <img src={default_folder} className="inline-block w-4 h-4" />
+              </>
             )
           }
         >

@@ -39,7 +39,7 @@ export default function FolderSearch() {
         {searchResults.map((item) => (
           <FileItem
             key={item.path}
-            file={{ path: item, name: item.split("/").pop() }}
+            file={{ path: item, name: item.split(/[\/\\]/).pop() }}
           />
         ))}
       </ul>
