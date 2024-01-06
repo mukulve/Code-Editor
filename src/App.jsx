@@ -9,6 +9,8 @@ import {
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
+import { Tooltip } from "@nextui-org/react";
+
 import { Resizable } from "re-resizable";
 const KanbanBoard = lazy(() => import("./KanbanBoard"));
 import Editor from "./Editor";
@@ -42,42 +44,57 @@ function App() {
         className="border-solid border-r border-text-foreground"
       >
         <aside className=" flex ">
-          <div className="min-w-10 max-w-12 flex flex-col overflow-auto h-full gap-2">
-            <button
-              onClick={() => {
-                setAsideCurrentTab(0);
-              }}
-            >
-              <FontAwesomeIcon icon={faCopy} />
-            </button>
-            <button
-              onClick={() => {
-                setAsideCurrentTab(1);
-              }}
-            >
-              <FontAwesomeIcon icon={faSearch} />
-            </button>
-            <button
-              onClick={() => {
-                setAsideCurrentTab(2);
-              }}
-            >
-              <FontAwesomeIcon icon={faCodeBranch} />
-            </button>
-            <button
-              onClick={() => {
-                setAsideCurrentTab(3);
-              }}
-            >
-              <FontAwesomeIcon icon={faChartGantt} />
-            </button>
-            <button
-              onClick={() => {
-                setAsideCurrentTab(4);
-              }}
-            >
-              <FontAwesomeIcon icon={faGear} />
-            </button>
+          <div className="min-w-10 max-w-16 flex flex-col overflow-auto h-screen gap-4 p-2 border-solid border-r border-text-foreground">
+            <Tooltip showArrow={true} content="Explorer" placement={"right"}>
+              <button
+                className="text-lg "
+                onClick={() => {
+                  setAsideCurrentTab(0);
+                }}
+              >
+                <FontAwesomeIcon icon={faCopy} />
+              </button>
+            </Tooltip>
+            <Tooltip showArrow={true} content="Search" placement={"right"}>
+              <button
+                className="text-lg "
+                onClick={() => {
+                  setAsideCurrentTab(1);
+                }}
+              >
+                <FontAwesomeIcon icon={faSearch} />
+              </button>
+            </Tooltip>
+            <Tooltip showArrow={true} content="Git" placement={"right"}>
+              <button
+                className="text-lg "
+                onClick={() => {
+                  setAsideCurrentTab(2);
+                }}
+              >
+                <FontAwesomeIcon icon={faCodeBranch} />
+              </button>
+            </Tooltip>
+            <Tooltip showArrow={true} content="Gantt Chart" placement={"right"}>
+              <button
+                className="text-lg "
+                onClick={() => {
+                  setAsideCurrentTab(3);
+                }}
+              >
+                <FontAwesomeIcon icon={faChartGantt} />
+              </button>
+            </Tooltip>
+            <Tooltip showArrow={true} content="Settings" placement={"right"}>
+              <button
+                className="text-lg "
+                onClick={() => {
+                  setAsideCurrentTab(4);
+                }}
+              >
+                <FontAwesomeIcon icon={faGear} />
+              </button>
+            </Tooltip>
           </div>
           <div className="w-full overflow-y-auto overflow-x-hidden h-screen px-2">
             <Suspense fallback={<div></div>}>

@@ -7,12 +7,13 @@ use notify::{RecursiveMode, Watcher};
 use rayon::prelude::*;
 use std::collections::HashSet;
 use std::path::Path;
+use std::process::Stdio;
 use std::sync::{Arc, Mutex};
 use std::{fs, thread};
 use tauri::api::dir::read_dir;
 use tauri::api::file::read_binary;
 use tauri::Manager;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -77,64 +78,83 @@ fn searchDirectoryForString(path: String, term: String) -> Result<HashSet<String
 }
 
 #[tauri::command]
-fn gitClone(src: String) -> Result<(), errors::Error> {
+async fn gitClone(src: String) -> Result<(), errors::Error> {
     addLog("Running git clone");
 
-    std::process::Command::new("git")
-        .current_dir(WORKINGDIR.lock().unwrap().clone())
+    let path = WORKINGDIR.lock().unwrap().clone();
+    tokio::process::Command::new("git")
+        .current_dir(path)
         .arg("clone")
         .arg(src)
-        .output()?;
+        .output()
+        .await?;
     Ok(())
 }
 
 #[tauri::command]
-fn gitInit() -> Result<(), errors::Error> {
+async fn gitInit() -> Result<(), errors::Error> {
     addLog("Running git init");
 
-    std::process::Command::new("git")
-        .current_dir(WORKINGDIR.lock().unwrap().clone())
+    let path = WORKINGDIR.lock().unwrap().clone();
+    tokio::process::Command::new("git")
+        .current_dir(path)
         .arg("init")
-        .output()?;
+        .output()
+        .await?;
     Ok(())
 }
 
 #[tauri::command]
-fn gitCommit(message: String) -> Result<(), errors::Error> {
+async fn gitCommit(message: String) -> Result<(), errors::Error> {
     addLog("Running git commit");
 
-    std::process::Command::new("git")
-        .current_dir(WORKINGDIR.lock().unwrap().clone())
+    let path = WORKINGDIR.lock().unwrap().clone();
+    tokio::process::Command::new("git")
+        .current_dir(path)
         .arg("commit")
         .arg("-m")
         .arg(message)
-        .output()?;
+        .output()
+        .await?;
     Ok(())
 }
 
 #[tauri::command]
-fn gitPush() -> Result<(), errors::Error> {
+async fn gitPush() -> Result<(), errors::Error> {
     addLog("Running git push");
-
-    std::process::Command::new("git")
-        .current_dir(WORKINGDIR.lock().unwrap().clone())
+    let path = WORKINGDIR.lock().unwrap().clone();
+    tokio::process::Command::new("git")
+        .current_dir(path)
         .arg("push")
         .arg("-u")
         .arg("origin")
         .arg("master")
-        .output()?;
+        .output()
+        .await?;
     Ok(())
 }
 
 #[tauri::command]
-fn runTerminalCommand(command: String) -> Result<String, errors::Error> {
+async fn runTerminalCommand(command: String) -> Result<String, errors::Error> {
     addLog("Running Terminal Command");
 
-    let output = std::process::Command::new(command)
-        .current_dir(WORKINGDIR.lock().unwrap().clone())
-        .output()?;
+    let mut output = String::new();
+    let mut args: Vec<_> = command.split_whitespace().collect();
+    let cmdMain = args.remove(0).to_string();
+    let path = WORKINGDIR.lock().unwrap().clone();
+    let mut cmd = tokio::process::Command::new(cmdMain);
+    cmd.current_dir(path);
+    cmd.args(args);
+    cmd.stdout(Stdio::piped());
+    let mut child = cmd.spawn()?;
+    let stdout = child.stdout.take().unwrap();
+    let mut reader = BufReader::new(stdout).lines();
 
-    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    while let Some(line) = reader.next_line().await? {
+        output.push_str(&(line + "\n"));
+    }
+
+    Ok(output)
 }
 
 #[tauri::command]

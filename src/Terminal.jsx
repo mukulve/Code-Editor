@@ -70,6 +70,7 @@ export default function Terminal() {
               </Button>
             }
             placeholder="Terminal"
+            value={terminalCommand}
             onChange={(e) => setTerminalCommand(e.target.value)}
           />
           <div className="flex flex-col-reverse">

@@ -5,11 +5,13 @@ import Terminal from "./Terminal";
 import { Button, ButtonGroup } from "@nextui-org/react";
 import { Breadcrumbs, BreadcrumbItem } from "@nextui-org/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faPencilRuler } from "@fortawesome/free-solid-svg-icons";
 import { Code } from "@nextui-org/react";
 import { useElementSize } from "usehooks-ts";
 import { invoke } from "@tauri-apps/api/tauri";
 import { useDarkMode } from "usehooks-ts";
+
+import LanguageIcon from "./languageIcon";
 
 export default function Editor() {
   const { isDarkMode } = useDarkMode();
@@ -55,7 +57,6 @@ export default function Editor() {
             ? 0
             : currentOpenFileRef.current + 1
         );
-        console.log(currentOpenFile);
       }
     }
 
@@ -68,24 +69,30 @@ export default function Editor() {
 
   if (currentPath == null) {
     return (
-      <main className="flex justify-center items-center justify-items-center h-screen w-full">
+      <main className="relative flex flex-col gap-4 justify-center items-center justify-items-center h-screen w-full">
+        <FontAwesomeIcon icon={faPencilRuler} className="text-4xl" />
         <Code>Open A Directory</Code>
+        <Terminal />
       </main>
     );
   }
 
   if (loading) {
     return (
-      <main className="flex justify-center items-center justify-items-center h-screen w-full">
+      <main className=" relative flex flex-col gap-4 justify-center items-center justify-items-center h-screen w-full">
+        <FontAwesomeIcon icon={faPencilRuler} className="text-4xl" />
         <Code>Loading</Code>
+        <Terminal />
       </main>
     );
   }
 
   if (currentOpenFile == null || openFiles.length == 0) {
     return (
-      <main className="flex justify-center items-center justify-items-center h-screen w-full ">
+      <main className=" relative flex flex-col gap-4 justify-center items-center justify-items-center h-screen w-full ">
+        <FontAwesomeIcon icon={faPencilRuler} className="text-4xl" />
         <Code>No Open Files</Code>
+        <Terminal />
       </main>
     );
   }
@@ -111,6 +118,7 @@ export default function Editor() {
                 <FontAwesomeIcon icon={faClose} />
               </Button>
             }
+            startContent={<LanguageIcon language={child.path} />}
           >
             {child.name}
           </Button>

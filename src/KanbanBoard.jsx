@@ -16,6 +16,7 @@ export default function KanbanBoard() {
   const [
     backlogs,
     {
+      set: setBacklog,
       removeAt: removeAtBacklog,
       insertAt: insetAtBacklog,
       clear: clearBacklog,
@@ -24,16 +25,31 @@ export default function KanbanBoard() {
 
   const [
     todos,
-    { removeAt: removeAtTodo, insertAt: insetAtTodo, clear: clearTodo },
+    {
+      set: setTodo,
+      removeAt: removeAtTodo,
+      insertAt: insetAtTodo,
+      clear: clearTodo,
+    },
   ] = useList([]);
 
   const [
     doings,
-    { removeAt: removeAtDoing, insertAt: insetAtDoing, clear: clearDoing },
+    {
+      set: setDoing,
+      removeAt: removeAtDoing,
+      insertAt: insetAtDoing,
+      clear: clearDoing,
+    },
   ] = useList([]);
   const [
     dones,
-    { removeAt: removeAtDone, insertAt: insetAtDone, clear: clearDone },
+    {
+      set: setDone,
+      removeAt: removeAtDone,
+      insertAt: insetAtDone,
+      clear: clearDone,
+    },
   ] = useList([]);
 
   const [newBacklog, setNewBacklog] = useState("");
@@ -48,10 +64,10 @@ export default function KanbanBoard() {
 
   async function writeKanban() {
     let kandbanJson = {
-      backlogs: backlogs.filter((x) => x != null && x != ""),
-      todos: todos.filter((x) => x != null && x != ""),
-      doings: doings.filter((x) => x != null && x != ""),
-      dones: dones.filter((x) => x != null && x != ""),
+      backlogs: backlogs,
+      todos: todos,
+      doings: doings,
+      dones: dones,
     };
 
     try {
@@ -68,10 +84,12 @@ export default function KanbanBoard() {
       let result = await invoke("readKanbanBoardFromFile", {});
       if (result) {
         let kanbanJson = JSON.parse(result);
-        insetAtBacklog(0, ...kanbanJson.backlogs);
-        insetAtTodo(0, ...kanbanJson.todos);
-        insetAtDoing(0, ...kanbanJson.doings);
-        insetAtDone(0, ...kanbanJson.dones);
+        console.log(kanbanJson);
+        setBacklog(kanbanJson.backlogs);
+        setTodo(kanbanJson.todos);
+        setDoing(kanbanJson.doings);
+        setDone(kanbanJson.dones);
+        console.log(backlogs);
       }
     } catch (e) {
       setError(e);
@@ -129,21 +147,19 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {backlogs
-          .filter((x) => x != null && x != "")
-          .map((backlog, index) => (
-            <li key={index} className="flex justify-between">
-              {backlog}
-              <Button
-                isIconOnly
-                onClick={() => removeAtBacklog(index)}
-                color="light"
-                size="sm"
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            </li>
-          ))}
+        {backlogs.map((backlog, index) => (
+          <li key={index} className="flex justify-between">
+            {backlog}
+            <Button
+              isIconOnly
+              onClick={() => removeAtBacklog(index)}
+              color="light"
+              size="sm"
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </li>
+        ))}
       </ul>
       <h1 className="text-clip font-semibold ">TODO</h1>
       <Input
@@ -158,28 +174,26 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {todos
-          .filter((x) => x != null && x != "")
-          .map((todo, index) => (
-            <li key={index} className="flex justify-between">
-              {todo}
-              <Button
-                isIconOnly
-                onClick={() => removeAtTodo(index)}
-                color="light"
-                size="sm"
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            </li>
-          ))}
+        {todos.map((todo, index) => (
+          <li key={index} className="flex justify-between">
+            {todo}
+            <Button
+              isIconOnly
+              onClick={() => removeAtTodo(index)}
+              color="light"
+              size="sm"
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </li>
+        ))}
       </ul>
       <h1 className="text-clip font-semibold ">Doing</h1>
       <Input
         size="sm"
         value={newDoing}
         onValueChange={setNewDoing}
-        placeholder="Initial Commit"
+        placeholder="Doing Item"
         endContent={
           <Button size="sm" onClick={() => insetAtDoing(0, newDoing)}>
             Add
@@ -187,28 +201,26 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {doings
-          .filter((x) => x != null && x != "")
-          .map((doing, index) => (
-            <li key={index} className="flex justify-between">
-              {doing}
-              <Button
-                isIconOnly
-                onClick={() => removeAtDoing(index)}
-                color="light"
-                size="sm"
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            </li>
-          ))}
+        {doings.map((doing, index) => (
+          <li key={index} className="flex justify-between">
+            {doing}
+            <Button
+              isIconOnly
+              onClick={() => removeAtDoing(index)}
+              color="light"
+              size="sm"
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </li>
+        ))}
       </ul>
       <h1 className="text-clip font-semibold ">Done</h1>
       <Input
         size="sm"
         value={newDone}
         onValueChange={setNewDone}
-        placeholder="Initial Commit"
+        placeholder="Done Item"
         endContent={
           <Button size="sm" onClick={() => insetAtDone(0, newDone)}>
             Add
@@ -216,21 +228,19 @@ export default function KanbanBoard() {
         }
       />
       <ul>
-        {dones
-          .filter((x) => x != null && x != "")
-          .map((done, index) => (
-            <li key={index} className="flex justify-between">
-              {done}
-              <Button
-                isIconOnly
-                onClick={() => removeAtDone(index)}
-                color="light"
-                size="sm"
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            </li>
-          ))}
+        {dones.map((done, index) => (
+          <li key={index} className="flex justify-between">
+            {done}
+            <Button
+              isIconOnly
+              onClick={() => removeAtDone(index)}
+              color="light"
+              size="sm"
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </li>
+        ))}
       </ul>
     </div>
   );

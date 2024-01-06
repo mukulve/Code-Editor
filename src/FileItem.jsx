@@ -18,6 +18,8 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 import default_file from "./assets/default_file.svg";
 
+import LanguageIcon from "./languageIcon";
+
 export default function FileItem({ file }) {
   const { isDarkMode, toggle, enable, disable } = useDarkMode();
   const { setError } = useContext(ErrorContext);
@@ -72,7 +74,7 @@ export default function FileItem({ file }) {
           e.preventDefault();
         }}
       >
-        <img src={default_file} className="inline-block w-4 h-4 mr-1" />
+        <LanguageIcon language={file.name} />
         {file.name}
       </li>
 

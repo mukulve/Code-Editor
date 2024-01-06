@@ -9,7 +9,7 @@ export default function Settings() {
         <h1 className="text-clip font-semibold ">Dark Mode</h1>
         <Switch size="sm" onClick={toggle} defaultSelected={isDarkMode} />
       </div>
-      <h1 className="mt-2">Made by Mukul with Tauri, Rust, React</h1>
+      <h1 className="mt-4 text-sm">Made by Mukul using Tauri, Rust, React</h1>
     </>
   );
 }

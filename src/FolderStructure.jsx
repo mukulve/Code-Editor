@@ -39,7 +39,6 @@ export default function FolderStructure() {
   }
 
   async function rereadDirecotry() {
-    console.log(currentPathRef.current);
     setReadingDirectory(true);
     try {
       setDirectory(
@@ -81,7 +80,6 @@ export default function FolderStructure() {
 
   const debouncedReadDirectory = useCallback(
     debounce(() => {
-      console.log("event");
       rereadDirecotry();
       //readDirectory();
     }, 2000),
