@@ -1,3 +1,5 @@
+import { Image } from "@nextui-org/react";
+
 import default_file from "./assets/default_file.svg";
 import file_type_c from "./assets/file_type_c.svg";
 import file_type_cpp from "./assets/file_type_cpp.svg";
@@ -24,49 +26,192 @@ import file_type_yaml from "./assets/file_type_yaml.svg";
 export default function LanguageIcon({ language }) {
   let lang = language.split(".").pop();
   if (lang === "c")
-    return <img src={file_type_c} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_c}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "cpp")
-    return <img src={file_type_cpp} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_cpp}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "cs")
-    return <img src={file_type_csharp} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_csharp}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "css")
-    return <img src={file_type_css} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_css}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "go")
-    return <img src={file_type_go} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_go}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "html")
-    return <img src={file_type_html} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_html}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "js")
     return (
-      <img src={file_type_js_official} className="inline-block w-4 h-4 mr-1" />
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_js_official}
+        className="inline-block mr-1"
+      />
     );
   if (lang === "json")
-    return <img src={file_type_json} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_json}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "rs")
-    return <img src={file_type_rust} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_rust}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "py")
-    return <img src={file_type_python} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_python}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "svg")
-    return <img src={file_type_svg} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_svg}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "ts")
     return (
-      <img src={file_type_typescript} className="inline-block w-4 h-4 mr-1" />
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_typescript}
+        className="inline-block mr-1"
+      />
     );
   if (lang === "jsx")
     return (
-      <img src={file_type_reactjs} className="inline-block w-4 h-4 mr-1" />
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_reactjs}
+        className="inline-block mr-1"
+      />
     );
   if (lang === "h")
     return (
-      <img src={file_type_cheader} className="inline-block w-4 h-4 mr-1" />
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_cheader}
+        className="inline-block mr-1"
+      />
     );
   if (lang === "md")
     return (
-      <img src={file_type_markdown} className="inline-block w-4 h-4 mr-1" />
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_markdown}
+        className="inline-block mr-1"
+      />
     );
   if (lang === "java")
-    return <img src={file_type_java} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_java}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "gitignore")
-    return <img src={file_type_git} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_git}
+        className="inline-block mr-1"
+      />
+    );
   if (
     lang === "png" ||
     lang === "jpg" ||
@@ -75,13 +220,58 @@ export default function LanguageIcon({ language }) {
     lang === "webp" ||
     lang == "ico"
   )
-    return <img src={file_type_image} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_image}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "rb")
-    return <img src={file_type_ruby} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_ruby}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "toml")
-    return <img src={file_type_toml} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_toml}
+        className="inline-block mr-1"
+      />
+    );
   if (lang === "yaml")
-    return <img src={file_type_yaml} className="inline-block w-4 h-4 mr-1" />;
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_yaml}
+        className="inline-block mr-1"
+      />
+    );
 
-  return <img src={default_file} className="inline-block w-4 h-4 mr-1" />;
+  return (
+    <Image
+      removeWrapper
+      radius={"none"}
+      width={16}
+      height={16}
+      src={default_file}
+      className="inline-block mr-1"
+    />
+  );
 }
