@@ -1,25 +1,18 @@
 mod errors;
 mod logging;
-
-use std::collections::HashSet;
-use std::io::Write;
-use std::path::Path;
-use std::sync::{mpsc, Arc, Mutex};
-
-use std::{fs, thread};
-
-use rayon::prelude::*;
-
-use ignore::Walk;
-
 use cached::proc_macro::cached;
-
-use notify::{RecursiveMode, Watcher};
-
+use ignore::Walk;
 use lazy_static::lazy_static;
+use notify::{RecursiveMode, Watcher};
+use rayon::prelude::*;
+use std::collections::HashSet;
+use std::path::Path;
+use std::sync::{Arc, Mutex};
+use std::{fs, thread};
 use tauri::api::dir::read_dir;
 use tauri::api::file::read_binary;
 use tauri::Manager;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #[cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -31,30 +24,28 @@ lazy_static! {
 
 #[tauri::command]
 fn readDirectory(path: String) -> Result<Vec<tauri::api::dir::DiskEntry>, errors::Error> {
-    LOGS.lock().unwrap().addLog("Reading directory".to_string());
+    addLog("Reading directory");
 
     *WORKINGDIR.lock().unwrap() = path.clone();
     Ok(read_dir(path, true)?)
 }
 
 #[tauri::command]
-fn readFile(path: String) -> Result<String, String> {
-    LOGS.lock().unwrap().addLog("Reading file".to_string());
+async fn readFile(path: String) -> Result<String, errors::Error> {
+    addLog("Reading file");
 
-    let file = read_binary(path);
-    let content = match file {
-        Ok(lines) => String::from_utf8_lossy(&lines).to_string(),
-        Err(_) => "".to_string(),
-    };
-    Ok(content)
+    let mut f = tokio::fs::File::open(path).await?;
+    let mut buffer = Vec::new();
+
+    // read the whole file
+    f.read_to_end(&mut buffer).await?;
+    Ok(String::from_utf8_lossy(&buffer).to_string())
 }
 
 #[cached]
 #[tauri::command]
 fn searchDirectoryForString(path: String, term: String) -> Result<HashSet<String>, String> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Searching Directory".to_string());
+    addLog("Searching Directory");
 
     let result = Arc::new(Mutex::new(HashSet::new()));
     let file_paths: Vec<_> = Walk::new(path)
@@ -87,7 +78,7 @@ fn searchDirectoryForString(path: String, term: String) -> Result<HashSet<String
 
 #[tauri::command]
 fn gitClone(src: String) -> Result<(), errors::Error> {
-    LOGS.lock().unwrap().addLog("Running git clone".to_string());
+    addLog("Running git clone");
 
     std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
@@ -99,7 +90,7 @@ fn gitClone(src: String) -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn gitInit() -> Result<(), errors::Error> {
-    LOGS.lock().unwrap().addLog("Running git init".to_string());
+    addLog("Running git init");
 
     std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
@@ -110,9 +101,7 @@ fn gitInit() -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn gitCommit(message: String) -> Result<(), errors::Error> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Running git commit".to_string());
+    addLog("Running git commit");
 
     std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
@@ -125,7 +114,7 @@ fn gitCommit(message: String) -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn gitPush() -> Result<(), errors::Error> {
-    LOGS.lock().unwrap().addLog("Running git push".to_string());
+    addLog("Running git push");
 
     std::process::Command::new("git")
         .current_dir(WORKINGDIR.lock().unwrap().clone())
@@ -139,9 +128,7 @@ fn gitPush() -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn runTerminalCommand(command: String) -> Result<String, errors::Error> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Running Terminal Command".to_string());
+    addLog("Running Terminal Command");
 
     let output = std::process::Command::new(command)
         .current_dir(WORKINGDIR.lock().unwrap().clone())
@@ -152,9 +139,7 @@ fn runTerminalCommand(command: String) -> Result<String, errors::Error> {
 
 #[tauri::command]
 fn createDirectory(path: String) -> Result<(), errors::Error> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Creating directory".to_string());
+    addLog("Creating directory");
 
     fs::create_dir(path)?;
     Ok(())
@@ -162,7 +147,7 @@ fn createDirectory(path: String) -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn createFile(path: String) -> Result<(), errors::Error> {
-    LOGS.lock().unwrap().addLog("Creating file".to_string());
+    addLog("Creating file");
 
     fs::File::create(path)?;
     Ok(())
@@ -170,7 +155,7 @@ fn createFile(path: String) -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn copyFile(path: String, to: String) -> Result<(), errors::Error> {
-    LOGS.lock().unwrap().addLog("Copying file".to_string());
+    addLog("Copying file");
 
     fs::copy(path, to)?;
     Ok(())
@@ -178,9 +163,7 @@ fn copyFile(path: String, to: String) -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn renameOrMoveFileOrDirectory(path: String, to: String) -> Result<(), errors::Error> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Renaming / moving file or directory".to_string());
+    addLog("Renaming / moving file or directory");
 
     fs::rename(path, to)?;
     Ok(())
@@ -188,7 +171,7 @@ fn renameOrMoveFileOrDirectory(path: String, to: String) -> Result<(), errors::E
 
 #[tauri::command]
 fn removeFile(path: String) -> Result<(), errors::Error> {
-    LOGS.lock().unwrap().addLog("Removing file".to_string());
+    addLog("Removing file");
 
     fs::remove_file(path)?;
     Ok(())
@@ -196,27 +179,23 @@ fn removeFile(path: String) -> Result<(), errors::Error> {
 
 #[tauri::command]
 fn removeDirectoryAndContents(path: String) -> Result<(), errors::Error> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Removing directory".to_string());
+    addLog("Removing directory");
 
     fs::remove_dir_all(path)?;
     Ok(())
 }
 
 #[tauri::command]
-fn writeToFile(path: String, content: String) -> Result<(), errors::Error> {
-    LOGS.lock().unwrap().addLog("Writing file".to_string());
+async fn writeToFile(path: String, content: String) -> Result<(), errors::Error> {
+    addLog("Writing file");
 
-    let mut file = fs::File::create(path)?;
-    file.write_all(content.as_bytes())?;
+    let mut file = tokio::fs::File::create(path).await?;
+    file.write_all(content.as_bytes()).await?;
     Ok(())
 }
 
 fn emitEvent(app: tauri::AppHandle, event: &str, payload: &str) -> Result<(), errors::Error> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Emitting tauri event".to_string());
+    addLog("Emitting tauri event");
 
     app.emit_all(event, payload)?;
     Ok(())
@@ -224,47 +203,36 @@ fn emitEvent(app: tauri::AppHandle, event: &str, payload: &str) -> Result<(), er
 
 #[tauri::command]
 fn checkIfKanbanExists() -> bool {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Checking if kanban exists".to_string());
+    addLog("Checking if kanban exists");
 
     let path = WORKINGDIR.lock().unwrap().clone();
     Path::new(&(path + "/mveditor/kanbanBoard.json")).exists()
 }
 
 #[tauri::command]
-fn writeKanbanBoardToFile(content: String) -> Result<(), errors::Error> {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Writing kaban to file".to_string());
+async fn writeKanbanBoardToFile(content: String) -> Result<(), errors::Error> {
+    addLog("Writing kaban to file");
 
     let path = WORKINGDIR.lock().unwrap().clone();
     if checkIfKanbanExists() == false {
         fs::create_dir(&(path.clone() + "/mveditor/"))?;
     }
-    let mut file = fs::File::create(&(path + "/mveditor/kanbanBoard.json"))?;
-    file.write_all(content.as_bytes())?;
+    writeToFile(path + "/mveditor/kanbanBoard.json", content).await?;
     Ok(())
 }
 
 #[tauri::command]
-fn readKanbanBoardFromFile() -> Result<String, String> {
-    LOGS.lock().unwrap().addLog("Reading kaban".to_string());
+async fn readKanbanBoardFromFile() -> Result<String, errors::Error> {
+    addLog("Reading kaban");
 
     let path = WORKINGDIR.lock().unwrap().clone();
-    let file = read_binary(&(path + "/mveditor/kanbanBoard.json"));
-    let content = match file {
-        Ok(lines) => String::from_utf8_lossy(&lines).to_string(),
-        Err(_) => "".to_string(),
-    };
+    let content = readFile(path + "/mveditor/kanbanBoard.json").await?;
     Ok(content)
 }
 
 //use notify to watch for changes in a directory
 fn watchDirectory(app: tauri::AppHandle) {
-    LOGS.lock()
-        .unwrap()
-        .addLog("Watching directory for changes".to_string());
+    addLog("Watching directory for changes");
 
     let mut watcher =
         notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| match res {
@@ -289,6 +257,10 @@ fn watchDirectory(app: tauri::AppHandle) {
 #[tauri::command]
 fn getLogs() -> Vec<logging::Log> {
     LOGS.lock().unwrap().getLogs().to_vec()
+}
+
+fn addLog(log: &str) {
+    LOGS.lock().unwrap().addLog(log.to_string());
 }
 
 fn main() {
