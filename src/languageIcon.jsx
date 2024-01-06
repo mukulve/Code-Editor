@@ -15,6 +15,11 @@ import file_type_reactjs from "./assets/file_type_reactjs.svg";
 import file_type_cheader from "./assets/file_type_cheader.svg";
 import file_type_markdown from "./assets/file_type_markdown.svg";
 import file_type_java from "./assets/file_type_java.svg";
+import file_type_git from "./assets/file_type_git.svg";
+import file_type_image from "./assets/file_type_image.svg";
+import file_type_ruby from "./assets/file_type_ruby.svg";
+import file_type_toml from "./assets/file_type_toml.svg";
+import file_type_yaml from "./assets/file_type_yaml.svg";
 
 export default function LanguageIcon({ language }) {
   let lang = language.split(".").pop();
@@ -60,6 +65,23 @@ export default function LanguageIcon({ language }) {
     );
   if (lang === "java")
     return <img src={file_type_java} className="inline-block w-4 h-4 mr-1" />;
+  if (lang === "gitignore")
+    return <img src={file_type_git} className="inline-block w-4 h-4 mr-1" />;
+  if (
+    lang === "png" ||
+    lang === "jpg" ||
+    lang === "jpeg" ||
+    lang === "gif" ||
+    lang === "webp" ||
+    lang == "ico"
+  )
+    return <img src={file_type_image} className="inline-block w-4 h-4 mr-1" />;
+  if (lang === "rb")
+    return <img src={file_type_ruby} className="inline-block w-4 h-4 mr-1" />;
+  if (lang === "toml")
+    return <img src={file_type_toml} className="inline-block w-4 h-4 mr-1" />;
+  if (lang === "yaml")
+    return <img src={file_type_yaml} className="inline-block w-4 h-4 mr-1" />;
 
   return <img src={default_file} className="inline-block w-4 h-4 mr-1" />;
 }

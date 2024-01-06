@@ -3,7 +3,12 @@ mod logging;
 use cached::proc_macro::cached;
 use ignore::Walk;
 use lazy_static::lazy_static;
-use notify::{RecursiveMode, Watcher};
+//use notify::{RecursiveMode, Watcher};
+use notify_debouncer_mini::{
+    new_debouncer,
+    notify::{RecursiveMode, Watcher},
+    DebounceEventResult,
+};
 use rayon::prelude::*;
 use std::collections::HashSet;
 use std::path::Path;
@@ -254,23 +259,26 @@ async fn readKanbanBoardFromFile() -> Result<String, errors::Error> {
 fn watchDirectory(app: tauri::AppHandle) {
     addLog("Watching directory for changes");
 
-    let mut watcher =
-        notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| match res {
-            Ok(_) => {
-                emitEvent(app.clone(), "file-changed", "file changed").unwrap();
-            }
-            Err(_) => {}
-        })
-        .unwrap();
+    let mut debouncer = new_debouncer(
+        std::time::Duration::from_secs(2),
+        move |res: DebounceEventResult| match res {
+            Ok(events) => events
+                .iter()
+                .for_each(|e| emitEvent(app.clone(), "file-changed", "file changed").unwrap()),
+            Err(e) => println!("Error {:?}", e),
+        },
+    )
+    .unwrap();
 
     thread::spawn(move || loop {
         let path = WORKINGDIR.lock().unwrap().clone();
-        watcher
+        debouncer
+            .watcher()
             .watch(Path::new(&path), RecursiveMode::Recursive)
             .unwrap();
 
         thread::sleep(std::time::Duration::from_secs(1));
-        watcher.unwatch(Path::new(&path)).unwrap_or(());
+        debouncer.watcher().unwatch(Path::new(&path)).unwrap_or(());
     });
 }
 

@@ -80,6 +80,7 @@ export default function FolderStructure() {
 
   const debouncedReadDirectory = useCallback(
     debounce(() => {
+      console.log("debounced");
       rereadDirecotry();
       //readDirectory();
     }, 2000),

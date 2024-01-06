@@ -84,12 +84,10 @@ export default function KanbanBoard() {
       let result = await invoke("readKanbanBoardFromFile", {});
       if (result) {
         let kanbanJson = JSON.parse(result);
-        console.log(kanbanJson);
         setBacklog(kanbanJson.backlogs);
         setTodo(kanbanJson.todos);
         setDoing(kanbanJson.doings);
         setDone(kanbanJson.dones);
-        console.log(backlogs);
       }
     } catch (e) {
       setError(e);

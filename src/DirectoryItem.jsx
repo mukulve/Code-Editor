@@ -105,7 +105,7 @@ export default function DirectoryItem({ directory }) {
         >
           {directory.name}
         </Button>
-        <div className="ml-2">
+        <div className="ml-4">
           {open && (
             <ul>
               {directory.children.map((child) => (
