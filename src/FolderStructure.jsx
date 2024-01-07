@@ -3,7 +3,7 @@ import EditorContext from "./EditorContext";
 import ErrorContext from "./ErrorContext";
 import { invoke } from "@tauri-apps/api/tauri";
 import FileOrDirectory from "./FileOrDirectory";
-import { Button, ButtonGroup } from "@nextui-org/react";
+import { Button, ButtonGroup, Code } from "@nextui-org/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFile,
@@ -99,6 +99,14 @@ export default function FolderStructure() {
     );
   }
 
+  if (readingDirectory) {
+    return (
+      <div className="flex justify-center items-center justify-items-center h-full ">
+        <Code>Loading</Code>
+      </div>
+    );
+  }
+
   if (currentPath != null) {
     return (
       <>
@@ -109,9 +117,11 @@ export default function FolderStructure() {
           <Button isIconOnly variant="light" onClick={createNewFolder}>
             <FontAwesomeIcon icon={faFolder} />
           </Button>
+          {/**
           <Button isIconOnly variant="light">
             <FontAwesomeIcon icon={faSearch} />
           </Button>
+           */}
 
           <Button isIconOnly variant="light" onClick={rereadDirecotry}>
             <FontAwesomeIcon icon={faRotateRight} />

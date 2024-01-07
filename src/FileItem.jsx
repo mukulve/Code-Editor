@@ -18,7 +18,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 
 import default_file from "./assets/default_file.svg";
 
-import LanguageIcon from "./languageIcon";
+import LanguageIcon from "./LanguageIcon";
 
 export default function FileItem({ file }) {
   const { isDarkMode, toggle, enable, disable } = useDarkMode();

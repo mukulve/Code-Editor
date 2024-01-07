@@ -22,6 +22,8 @@ import file_type_image from "./assets/file_type_image.svg";
 import file_type_ruby from "./assets/file_type_ruby.svg";
 import file_type_toml from "./assets/file_type_toml.svg";
 import file_type_yaml from "./assets/file_type_yaml.svg";
+import file_type_xml from "./assets/file_type_xml.svg";
+import file_type_binary from "./assets/file_type_binary.svg";
 
 export default function LanguageIcon({ language }) {
   let lang = language.split(".").pop();
@@ -36,7 +38,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "cpp")
+  else if (lang === "cpp")
     return (
       <Image
         removeWrapper
@@ -47,7 +49,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "cs")
+  else if (lang === "cs")
     return (
       <Image
         removeWrapper
@@ -58,7 +60,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "css")
+  else if (lang === "css")
     return (
       <Image
         removeWrapper
@@ -69,7 +71,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "go")
+  else if (lang === "go")
     return (
       <Image
         removeWrapper
@@ -80,7 +82,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "html")
+  else if (lang === "html")
     return (
       <Image
         removeWrapper
@@ -91,7 +93,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "js")
+  else if (lang === "js")
     return (
       <Image
         removeWrapper
@@ -102,7 +104,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "json")
+  else if (lang === "json")
     return (
       <Image
         removeWrapper
@@ -113,7 +115,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "rs")
+  else if (lang === "rs")
     return (
       <Image
         removeWrapper
@@ -124,7 +126,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "py")
+  else if (lang === "py")
     return (
       <Image
         removeWrapper
@@ -135,7 +137,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "svg")
+  else if (lang === "svg")
     return (
       <Image
         removeWrapper
@@ -146,7 +148,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "ts")
+  else if (lang === "ts")
     return (
       <Image
         removeWrapper
@@ -157,7 +159,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "jsx")
+  else if (lang === "jsx")
     return (
       <Image
         removeWrapper
@@ -168,7 +170,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "h")
+  else if (lang === "h")
     return (
       <Image
         removeWrapper
@@ -179,7 +181,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "md")
+  else if (lang === "md")
     return (
       <Image
         removeWrapper
@@ -190,7 +192,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "java")
+  else if (lang === "java")
     return (
       <Image
         removeWrapper
@@ -201,7 +203,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "gitignore")
+  else if (lang === "gitignore")
     return (
       <Image
         removeWrapper
@@ -212,11 +214,11 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (
+  else if (
     lang === "png" ||
     lang === "jpg" ||
     lang === "jpeg" ||
-    lang === "gif" ||
+    lang === "gelse if" ||
     lang === "webp" ||
     lang == "ico"
   )
@@ -230,7 +232,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "rb")
+  else if (lang === "rb")
     return (
       <Image
         removeWrapper
@@ -241,7 +243,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "toml")
+  else if (lang === "toml")
     return (
       <Image
         removeWrapper
@@ -252,7 +254,7 @@ export default function LanguageIcon({ language }) {
         className="inline-block mr-1"
       />
     );
-  if (lang === "yaml")
+  else if (lang === "yaml")
     return (
       <Image
         removeWrapper
@@ -260,6 +262,28 @@ export default function LanguageIcon({ language }) {
         width={16}
         height={16}
         src={file_type_yaml}
+        className="inline-block mr-1"
+      />
+    );
+  else if (lang === "xml")
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_xml}
+        className="inline-block mr-1"
+      />
+    );
+  else if (lang === "bin" || lang === "exe" || lang === "dll")
+    return (
+      <Image
+        removeWrapper
+        radius={"none"}
+        width={16}
+        height={16}
+        src={file_type_binary}
         className="inline-block mr-1"
       />
     );

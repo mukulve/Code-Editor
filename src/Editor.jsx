@@ -11,7 +11,7 @@ import { useElementSize } from "usehooks-ts";
 import { invoke } from "@tauri-apps/api/tauri";
 import { useDarkMode } from "usehooks-ts";
 
-import LanguageIcon from "./languageIcon";
+import LanguageIcon from "./LanguageIcon";
 
 export default function Editor() {
   const { isDarkMode } = useDarkMode();
@@ -26,10 +26,7 @@ export default function Editor() {
   } = useContext(EditorContext);
 
   function updateFileContent(e) {
-    //let newArr = [...openFiles];
     openFiles[currentOpenFile].content = e.target.value;
-    //setOpenFiles(newArr);
-    //console.log(newArr);
   }
 
   const openFilesRef = useRef();
@@ -98,7 +95,7 @@ export default function Editor() {
   }
 
   return (
-    <main className="w-full relative overflow-auto">
+    <main className="w-full relative overflow-auto px-2">
       <ButtonGroup
         ref={buttonGroupRef}
         size="sm"
@@ -133,7 +130,7 @@ export default function Editor() {
           ))}
       </Breadcrumbs>
       <div
-        className="relative pb-32 overflow-auto w-full"
+        className="relative pb-[50vh] overflow-auto w-full"
         style={{
           height: `calc(100vh - ${breadCrumbsH + buttonGroupH}px)`,
           maxHeight: `calc(100vh - ${breadCrumbsH + buttonGroupH}px)`,

@@ -41,7 +41,8 @@ async fn readFile(path: String) -> Result<String, errors::Error> {
     addLog("Reading file");
 
     let mut f = tokio::fs::File::open(path).await?;
-    let mut buffer = Vec::new();
+    let fileSize = f.metadata().await?.len();
+    let mut buffer = Vec::with_capacity(fileSize as usize);
 
     // read the whole file
     f.read_to_end(&mut buffer).await?;
@@ -264,6 +265,7 @@ fn watchDirectory(app: tauri::AppHandle) {
         move |res: DebounceEventResult| match res {
             Ok(events) => events
                 .iter()
+                .par_bridge()
                 .for_each(|e| emitEvent(app.clone(), "file-changed", "file changed").unwrap()),
             Err(e) => println!("Error {:?}", e),
         },

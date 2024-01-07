@@ -23,7 +23,7 @@ function App() {
   const [asideCurrentTab, setAsideCurrentTab] = useState(0);
 
   return (
-    <div className="flex gap-2">
+    <div className="flex ">
       <Resizable
         defaultSize={{
           width: "15rem",
