@@ -96,18 +96,16 @@ export default function Editor() {
 
   return (
     <main className="w-full relative overflow-auto px-2">
-      <ButtonGroup
-        ref={buttonGroupRef}
-        size="sm"
-        className="bg-background overflow-x-auto max-w-full"
-      >
+      <div ref={buttonGroupRef} className="overflow-x-auto flex shrink-0">
         {openFiles.map((child, i) => (
           <Button
+            size="sm"
             key={i}
             onClick={() => setCurrentOpenFile(i)}
             className="bg-background shrink-0 "
             endContent={
               <Button
+                size="sm"
                 isIconOnly
                 className="bg-background"
                 onClick={() => closeFile(i)}
@@ -120,8 +118,8 @@ export default function Editor() {
             {child.name}
           </Button>
         ))}
-      </ButtonGroup>
-      <Breadcrumbs isDisabled ref={breadCrumbsRef}>
+      </div>
+      <Breadcrumbs isDisabled ref={breadCrumbsRef} maxItems={2}>
         {openFiles[currentOpenFile].path
           .split(/[\/\\]/)
           .slice(1)
