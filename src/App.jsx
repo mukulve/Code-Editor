@@ -245,7 +245,9 @@ function App() {
             </div>
           )}
         </aside>
-        <Editor />
+        <div className="flex-initial w-full overflow-hidden">
+          <Editor />
+        </div>
       </div>
 
       <Footer sidePanelHandler={setSidePanel} currentPanel={sidePanel} />

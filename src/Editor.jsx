@@ -71,10 +71,9 @@ function Editor() {
         ))}
       </div>
       <div
-        className="overflow-scroll "
+        className="overflow-scroll w-full"
         style={{
           height: "calc(100dvh - 45px - 30px - 32px)",
-          width: "calc(100vw - 4rem - 14rem)",
         }}
       >
         <TextareaCodeEditor />
