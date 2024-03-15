@@ -11,17 +11,23 @@ A simple lightweight code editor made with Tauri, Rust, React and DaisyUI
 </p>
 
 ## Todo
+
 ### UI
-- [ ] Make UI elements resizable  
+
+- [ ] Make UI elements resizable
 - [ ] Create terminal UI component
 - [ ] Clean up react components
 - [ ] Add error checking when calling rust functions
 - [ ] Add other IO operations (renaming files, moving files, etc.)
-### Backend 
+- [ ] Create better terminal UI
+
+### Backend
+
 - [ ] Complete Git functions in git.rs
-- [ ] Create a terminal backend
+- [ ] Create a more sophisticated terminal backend
 
 ## License
+
 ```
 MIT License
 

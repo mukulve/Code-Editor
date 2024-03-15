@@ -6,6 +6,7 @@ mod errors;
 mod git;
 mod io;
 mod logging;
+mod terminal;
 
 use crate::editor::highlight_code;
 use crate::git::{git_add, git_commit, git_history, git_init, git_push};
@@ -13,6 +14,7 @@ use crate::io::{
     copy_file, create_directory, create_file, detect_changes, move_file_or_directory,
     read_directory, read_file, remove_directory, remove_file, search_directory, write_to_file,
 };
+use crate::terminal::run_command;
 use lazy_static::lazy_static;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -53,7 +55,8 @@ fn main() {
             git_history,
             git_init,
             git_push,
-            highlight_code
+            highlight_code,
+            run_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

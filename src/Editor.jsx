@@ -8,6 +8,7 @@ import {
 import FileIcon from "./FileIcon";
 import EditorContext from "./EditorContext";
 import TextareaCodeEditor from "./TextareaCodeEditor";
+import Terminal from "./Terminal";
 
 function Editor() {
   const {
@@ -71,12 +72,13 @@ function Editor() {
         ))}
       </div>
       <div
-        className="overflow-scroll w-full"
+        className="overflow-scroll w-full relative pb-40 "
         style={{
           height: "calc(100dvh - 45px - 30px - 32px)",
         }}
       >
         <TextareaCodeEditor />
+        <Terminal />
         {/*
         
         <div className="absolute top-0 bg-base-200">
