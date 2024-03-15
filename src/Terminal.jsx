@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
+import EditorContext from "./EditorContext";
+
 export default function Terminal() {
+  const { currentDirectory } = useContext(EditorContext);
+
   const [command, setCommand] = useState("");
   const [logs, setLogs] = useState([]);
   const [commandOutput, setCommandOutput] = useState([]);
@@ -8,6 +12,7 @@ export default function Terminal() {
   async function sendCommand() {
     const response = await invoke("run_command", {
       command: command,
+      directory: currentDirectory,
     });
     setCommandOutput((commandOutput) => [...commandOutput, response]);
     setCommand("");
@@ -47,7 +52,9 @@ export default function Terminal() {
           </div>
           <div className="flex flex-col-reverse">
             {commandOutput.map((output, i) => (
-              <div key={i}>{output}</div>
+              <div key={i} className="whitespace-pre-line ">
+                {output}
+              </div>
             ))}
           </div>
         </div>
