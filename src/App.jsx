@@ -36,8 +36,12 @@ function App() {
   async function readDirectory() {
     if (currentDirectoryRef.current == null) return;
 
-    let folder = currentDirectoryRef.current;
-    setDirectoryItems(await invoke("read_directory", { path: folder }));
+    try {
+      let folder = currentDirectoryRef.current;
+      setDirectoryItems(await invoke("read_directory", { path: folder }));
+    } catch {
+      OpenFolder();
+    }
   }
 
   async function searchDirectory() {

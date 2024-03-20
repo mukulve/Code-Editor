@@ -20,6 +20,7 @@ A simple lightweight code editor made with Tauri, Rust, React and DaisyUI
 - [ ] Add error checking when calling rust functions
 - [ ] Add other IO operations (renaming files, moving files, etc.)
 - [ ] Create better terminal UI
+- [ ] Position suggestions div right below caret position 
 
 ### Backend
 

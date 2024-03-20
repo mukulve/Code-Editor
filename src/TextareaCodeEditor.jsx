@@ -15,6 +15,8 @@ export default function TextareaCodeEditor() {
   const textareaRef = useRef(null);
   const editorRef = useRef(null);
 
+  const [suggestions, setSuggestions] = useState([]);
+
   useEffect(() => {
     async function handleKeyDown(event) {
       const code = event.which || event.keyCode;
@@ -54,6 +56,7 @@ export default function TextareaCodeEditor() {
     };
 
     fetchArray();
+    //getSuggestions();
   }, [openFiles, currentFile]);
 
   function updateFileContent(e) {
@@ -73,32 +76,68 @@ export default function TextareaCodeEditor() {
     }
   };
 
+  async function getSuggestions() {
+    let text = textareaRef.current.value;
+    let cursorPosition = textareaRef.current.selectionStart;
+    let start = cursorPosition;
+    let end = cursorPosition;
+    while (start > 0 && text[start] !== " ") {
+      start--;
+    }
+
+    while (end < text.length && text[end] !== " ") {
+      end++;
+    }
+
+    let word = text.substring(start, end).trim().split(/\s+/)[0];
+
+    let suggestions = await invoke("get_suggestions", {
+      content: openFiles[currentFile]?.content || "",
+      word: word,
+    });
+
+    setSuggestions(suggestions);
+  }
+
   return (
-    <div className="relative text-left p-0 overflow-auto text-base font-mono leading-relaxed w-full h-full">
-      <textarea
-        ref={textareaRef}
-        wrap="off"
-        autoComplete="off"
-        autoCorrect="off"
-        spellCheck="false"
-        autoCapitalize="off"
-        placeholder="Please enter Code."
-        className="outline-none resize m-0 border-0 bg-transparent whitespace-nowrap break-keep absolute top-0 left-0  h-fit w-full min-w-full p-0 min-h-20 opacity-60  text-base font-mono leading-relaxed overflow-hidden"
-        value={openFiles[currentFile]?.content || ""}
-        onChange={(e) => updateFileContent(e)}
-        style={{
-          WebkitTextFillColor: "transparent",
-        }}
-      ></textarea>
-      <div className="m-0 border-0 bg-transparent p-0 whitespace-nowrap break-keep min-h-20 text-base font-mono leading-relaxed h-fit ">
-        <pre className="m-0 p-0">
-          <code ref={editorRef}>
-            {parse(codeArray.join("\n"))}
-            <span class="text-primary"></span>
-            <span class="text-secondary"></span>
-            <span class="text-accent"></span>
-          </code>
-        </pre>
+    <div className="relative text-left p-0 overflow-auto text-base font-mono leading-relaxed w-full h-full flex ">
+      <div className="w-10 flex-none h-full select-none">
+        {codeArray.map((line, i) => (
+          <div key={i}>{i + 1}</div>
+        ))}
+      </div>
+      <div>
+        <textarea
+          ref={textareaRef}
+          wrap="off"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck="false"
+          autoCapitalize="off"
+          placeholder="Please enter Code."
+          className=" outline-none resize m-0 pl-10 border-0 bg-transparent whitespace-nowrap break-keep absolute top-0 left-0  h-fit w-full min-w-full p-0 min-h-20 opacity-60  text-base font-mono leading-relaxed overflow-hidden"
+          value={openFiles[currentFile]?.content || ""}
+          onChange={(e) => updateFileContent(e)}
+          style={{
+            WebkitTextFillColor: "transparent",
+          }}
+        ></textarea>
+        <div className="m-0 border-0 bg-transparent p-0 whitespace-nowrap break-keep min-h-20 text-base font-mono leading-relaxed h-fit ">
+          <pre className="m-0 p-0">
+            <code ref={editorRef}>
+              {parse(codeArray.join("\n"))}
+              <span class="text-primary"></span>
+              <span class="text-secondary"></span>
+              <span class="text-accent"></span>
+            </code>
+          </pre>
+        </div>
+        <div className="absolute top-0 left-0 hidden">
+          <p>Suggestions</p>
+          {suggestions.map((suggestion, i) => (
+            <div key={i}>{suggestion}</div>
+          ))}
+        </div>
       </div>
     </div>
   );

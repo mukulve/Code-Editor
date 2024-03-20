@@ -8,7 +8,7 @@ mod io;
 mod logging;
 mod terminal;
 
-use crate::editor::highlight_code;
+use crate::editor::{get_suggestions, highlight_code};
 use crate::git::{git_add, git_commit, git_history, git_init, git_push};
 use crate::io::{
     copy_file, create_directory, create_file, detect_changes, move_file_or_directory,
@@ -56,7 +56,8 @@ fn main() {
             git_init,
             git_push,
             highlight_code,
-            run_command
+            run_command,
+            get_suggestions
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

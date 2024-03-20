@@ -1,6 +1,12 @@
+use std::sync::Arc;
+use std::sync::Mutex;
+
 use crate::errors;
 use cached::proc_macro::cached;
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
 use regex::Regex;
+use std::collections::HashSet;
 
 #[tauri::command]
 #[cached]
@@ -45,7 +51,7 @@ pub fn highlight_code(content: String) -> Result<Vec<String>, ()> {
     let conditions = vec!["if", "else", "match", "case", "default", "switch"];
     let keywords = vec![
         "return", "yield", "await", "async", "try", "catch", "throw", "import", "export", "use",
-        "from",
+        "from", "public", "mod",
     ];
     let operators = vec![
         "+", "-", "*", "/", "%", "++", "--", "==", "!=", ">", "<", ">=", "<=", "&&", "||", "!",
@@ -82,4 +88,27 @@ pub fn highlight_code(content: String) -> Result<Vec<String>, ()> {
     }
 
     Ok(new_lines)
+}
+
+#[tauri::command]
+#[cached]
+pub fn get_suggestions(content: String, word: String) -> HashSet<String> {
+    let suggestions = Arc::new(Mutex::new(HashSet::new()));
+    let words = content
+        .split_whitespace()
+        .map(|f| f.to_owned())
+        .map(|f| f.to_lowercase())
+        .collect::<Vec<String>>();
+    let word_lower = word.to_lowercase();
+
+    words.par_iter().for_each(|w| {
+        if w.starts_with(&word_lower) {
+            suggestions.lock().unwrap().insert(w.to_owned());
+        }
+    });
+
+    suggestions.lock().unwrap().remove(&word_lower);
+
+    let x = suggestions.lock().unwrap().to_owned();
+    x
 }
