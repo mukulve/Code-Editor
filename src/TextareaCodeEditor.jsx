@@ -72,7 +72,7 @@ export default function TextareaCodeEditor() {
     if (textarea && editor) {
       textarea.style.height =
         "calc( " + editor.offsetHeight + "px" + " + 25vh)";
-      textarea.style.width = editor.offsetWidth + "px";
+      textarea.style.width = "calc( " + editor.offsetWidth + "px" + " + 25vw)";
     }
   };
 
