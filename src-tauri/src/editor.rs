@@ -8,15 +8,8 @@ use rayon::iter::ParallelIterator;
 use regex::Regex;
 use std::collections::HashSet;
 
-#[tauri::command]
 #[cached]
-pub fn highlight_code(content: String) -> Result<Vec<String>, ()> {
-    let new_content = content
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("\"", "&quot;");
-    let regex = Regex::new(r"\r?\n").unwrap();
+pub fn highlight_line(content: String) -> String {
     let declarations = vec!["fn", "let", "mut", "function", "var", "const"];
     let types = vec![
         "i32",
@@ -59,33 +52,45 @@ pub fn highlight_code(content: String) -> Result<Vec<String>, ()> {
         "^=", "<<=", ">>=", ">>>=", ":", "?", "::", ".", ",", ";", "(", ")", "{", "}", "[", "]",
     ];
 
-    let lines: Vec<String> = regex.split(&new_content).map(|f| f.to_owned()).collect();
-    let mut new_lines = Vec::new();
+    let words = content
+        .split(" ")
+        .map(|f| f.to_owned())
+        .collect::<Vec<String>>();
+    let mut new_words = Vec::new();
 
-    for line in lines {
-        let words = line
-            .split(" ")
-            .map(|f| f.to_owned())
-            .collect::<Vec<String>>();
-        let mut new_words = Vec::new();
-
-        for word in words {
-            if declarations.contains(&word.as_str()) || keywords.contains(&word.as_str()) {
-                new_words.push(format!("<span class=\"text-primary\">{}</span>", word));
-            } else if types.contains(&word.as_str())
-                || loops.contains(&word.as_str())
-                || conditions.contains(&word.as_str())
-            {
-                new_words.push(format!("<span class=\"text-secondary\">{}</span>", word));
-            } else if operators.contains(&word.as_str()) || word.parse::<f64>().is_ok() {
-                new_words.push(format!("<span class=\"text-accent\">{}</span>", word));
-            } else {
-                new_words.push(word);
-            }
+    for word in words {
+        if declarations.contains(&word.as_str()) || keywords.contains(&word.as_str()) {
+            new_words.push(format!("<span class=\"text-primary\">{}</span>", word));
+        } else if types.contains(&word.as_str())
+            || loops.contains(&word.as_str())
+            || conditions.contains(&word.as_str())
+        {
+            new_words.push(format!("<span class=\"text-secondary\">{}</span>", word));
+        } else if operators.contains(&word.as_str()) || word.parse::<f64>().is_ok() {
+            new_words.push(format!("<span class=\"text-accent\">{}</span>", word));
+        } else {
+            new_words.push(word);
         }
-
-        new_lines.push(format!("<span>{}</span>", new_words.join(" ")));
     }
+    format!("<span>{}</span>", new_words.join(" "))
+}
+
+#[tauri::command]
+#[cached]
+pub fn highlight_code(content: String) -> Result<Vec<String>, ()> {
+    let new_content = content
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;");
+    let regex = Regex::new(r"\r?\n").unwrap();
+
+    let lines: Vec<String> = regex.split(&new_content).map(|f| f.to_owned()).collect();
+
+    let new_lines = lines
+        .par_iter()
+        .map(|f| highlight_line(f.to_string()))
+        .collect();
 
     Ok(new_lines)
 }
