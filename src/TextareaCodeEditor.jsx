@@ -26,7 +26,6 @@ export default function TextareaCodeEditor() {
         if (document.activeElement.tagName === "TEXTAREA") {
           event.preventDefault();
           let file = openFilesRef.current[currentFileRef.current];
-          console.log(file);
           await invoke("write_to_file", {
             path: file.path,
             content: file.content,
@@ -97,6 +96,15 @@ export default function TextareaCodeEditor() {
     });
 
     setSuggestions(suggestions);
+  }
+
+  if (openFiles[currentFile]?.isBinary == true) {
+    return (
+      <h1 className="text-center  w-full h-full flex align-middle items-center justify-center">
+        The file is not displayed in the text editor because it is either binary
+        or uses an unsupported text encoding
+      </h1>
+    );
   }
 
   return (

@@ -37,7 +37,7 @@ function CustomWindow() {
       data-tauri-drag-region
       className="h-[30px] select-none flex justify-between fixed top-0 left-0 right-0 z-50 items-center bg-base-200"
     >
-      <div className="dropdown dropdown-bottom">
+      <div className="dropdown dropdown-bottom flex-none">
         <div tabIndex={0} role="button" className="btn btn-xs">
           <FontAwesomeIcon icon={faBars} />
         </div>
@@ -52,10 +52,10 @@ function CustomWindow() {
           <li onClick={() => appWindow.close()}>Exit</li>
         </ul>
       </div>
-      <div>
+      <div className="flex-none">
         <span className="text-xs font-bold">{currentDirectory}</span>
       </div>
-      <div>
+      <div className="flex-none">
         <div className="btn btn-xs" onClick={() => appWindow.minimize()}>
           <FontAwesomeIcon icon={faMinimize} />
         </div>

@@ -26,11 +26,16 @@ function EditorProvider({ children }) {
         return;
       }
     }
-    let content = await invoke("read_file", { path: file.path });
+    let readFileStruct = await invoke("read_file", { path: file.path });
 
     setOpenFiles((openFiles) => [
       ...openFiles,
-      { path: file.path, name: file.name, content: content },
+      {
+        path: file.path,
+        name: file.name,
+        content: readFileStruct.content,
+        isBinary: readFileStruct.is_binary,
+      },
     ]);
     setCurrentFile(openFiles.length);
   }
