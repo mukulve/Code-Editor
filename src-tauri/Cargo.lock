@@ -3,6 +3,27 @@
 version = 3
 
 [[package]]
+name = "Code-Editor"
+version = "0.0.0"
+dependencies = [
+ "cached",
+ "ignore",
+ "lazy_static",
+ "memmap2",
+ "notify-debouncer-full",
+ "rayon",
+ "regex",
+ "serde",
+ "serde_json",
+ "sublime_fuzzy",
+ "tauri",
+ "tauri-build",
+ "thiserror",
+ "tokio",
+ "walkdir",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3870,27 +3891,6 @@ dependencies = [
  "webkit2gtk",
  "webview2-com",
  "windows 0.39.0",
-]
-
-[[package]]
-name = "tauri-app"
-version = "0.0.0"
-dependencies = [
- "cached",
- "ignore",
- "lazy_static",
- "memmap2",
- "notify-debouncer-full",
- "rayon",
- "regex",
- "serde",
- "serde_json",
- "sublime_fuzzy",
- "tauri",
- "tauri-build",
- "thiserror",
- "tokio",
- "walkdir",
 ]
 
 [[package]]

@@ -1,5 +1,6 @@
 use crate::{emit_event, errors};
 use cached::proc_macro::cached;
+use ignore::Walk;
 use lazy_static::lazy_static;
 use memmap2::Mmap;
 use notify_debouncer_full::{
@@ -16,7 +17,6 @@ use std::{
     time::Duration,
 };
 use tauri::api::dir::read_dir;
-use walkdir::WalkDir;
 
 lazy_static! {
     static ref CURRENT_PATH: Arc<Mutex<String>> = Arc::new(Mutex::new(String::from(".")));
@@ -30,13 +30,35 @@ pub fn read_directory(path: String) -> Result<Vec<tauri::api::dir::DiskEntry>, e
     dir.sort_by(|a, b| a.path.cmp(&b.path));
     Ok(dir)
 }
+#[derive(Clone, serde::Serialize)]
+pub struct ReadFileStruct {
+    path: String,
+    content: String,
+    is_binary: bool,
+}
 
 #[tauri::command]
-pub fn read_file(path: String) -> Result<String, errors::Error> {
+pub fn read_file(path: String) -> Result<ReadFileStruct, errors::Error> {
     emit_event("alert_event".to_string(), "Read File".to_string())?;
-    let file = std::fs::File::open(path)?;
+    let file = std::fs::File::open(path.clone())?;
     let mmap = unsafe { Mmap::map(&file)? };
-    let content = String::from_utf8_lossy(&mmap).to_string();
+
+    let content = match String::from_utf8((&mmap).to_vec()) {
+        Ok(content) => {
+            return Ok(ReadFileStruct {
+                path,
+                content,
+                is_binary: false,
+            })
+        }
+        Err(_) => ReadFileStruct {
+            path,
+            content: String::from_utf8_lossy(&mmap).to_string(),
+            is_binary: true,
+        },
+    };
+
+    //let content = String::from_utf8_lossy(&mmap).to_string();
     Ok(content)
 }
 
@@ -56,14 +78,12 @@ pub struct SearchDirectoryStruct {
 }
 
 #[tauri::command]
-pub fn search_directory(
-    path: String,
-    query: String,
-) -> Result<Vec<SearchDirectoryStruct>, errors::Error> {
-    emit_event("alert_event".to_string(), "Searching Directory".to_string())?;
+#[cached]
+pub fn search_directory(path: String, query: String) -> Result<Vec<SearchDirectoryStruct>, ()> {
+    emit_event("alert_event".to_string(), "Searching Directory".to_string()).unwrap();
     let results = Arc::new(Mutex::new(Vec::<SearchDirectoryStruct>::new()));
 
-    WalkDir::new(path)
+    Walk::new(path)
         .into_iter()
         .par_bridge()
         .filter_map(|e| e.ok())
