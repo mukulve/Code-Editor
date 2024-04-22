@@ -83,9 +83,15 @@ pub fn highlight_code(content: String) -> Result<Vec<String>, ()> {
         .replace("<", "&lt;")
         .replace(">", "&gt;")
         .replace("\"", "&quot;");
+
     let regex = Regex::new(r"\r?\n").unwrap();
 
     let lines: Vec<String> = regex.split(&new_content).map(|f| f.to_owned()).collect();
+
+    //check if the content is very large
+    if content.len() > 100000 {
+        return Ok(lines);
+    }
 
     let new_lines = lines
         .par_iter()
