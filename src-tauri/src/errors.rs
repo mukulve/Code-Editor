@@ -10,6 +10,8 @@ pub enum Error {
     WalkDir(#[from] walkdir::Error),
     #[error(transparent)]
     Regex(#[from] regex::Error),
+    #[error(transparent)]
+    Git2(#[from] git2::Error),
 }
 
 // we must manually implement serde::Serialize

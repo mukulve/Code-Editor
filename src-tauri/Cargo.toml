@@ -22,9 +22,10 @@ ignore = "0.4.21"
 lazy_static = "1.4.0"
 thiserror = "1.0"
 memmap2 = "0.9.3"
-sublime_fuzzy = "0.7.0"
+# sublime_fuzzy = "0.7.0"
 notify-debouncer-full = "0.3.1"
 regex = "1.10.3"
+git2 = "0.18.3"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

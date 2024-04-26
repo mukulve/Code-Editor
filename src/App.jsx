@@ -18,6 +18,7 @@ import {
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import { listen } from "@tauri-apps/api/event";
+import Git from "./Git";
 
 import EditorContext from "./EditorContext";
 
@@ -177,15 +178,7 @@ function App() {
             </ul>
           )}
 
-          {currentDirectory != null && currentTab == 2 && (
-            <div className="menu  menu-xs ">
-              <p className="menu-title">Git</p>
-              <button className="btn btn-sm">Git Init</button>
-              <button className="btn btn-sm">Git Add</button>
-              <button className="btn btn-sm"> Git Commit</button>
-              <button className="btn btn-sm">Git Push</button>
-            </div>
-          )}
+          {currentDirectory != null && currentTab == 2 && <Git />}
 
           {currentDirectory != null && currentTab == 3 && (
             <div className="menu  menu-xs h-full flex flex-col justify-between">
