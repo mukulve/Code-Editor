@@ -112,7 +112,7 @@ export default function TextareaCodeEditor() {
     <div className="relative text-left p-0 overflow-auto text-base font-mono leading-relaxed w-full h-full flex ">
       <div className="w-10 flex-none h-full select-none">
         {codeArray.map((_, i) => (
-          <LazyLoad height={26} key={i}>
+          <LazyLoad height={26} key={i} once>
             <div>{i + 1}</div>
           </LazyLoad>
         ))}
@@ -137,7 +137,7 @@ export default function TextareaCodeEditor() {
           <pre className="m-0 p-0">
             <code ref={editorRef}>
               {codeArray.map((line, i) => (
-                <LazyLoad height={26} key={i}>
+                <LazyLoad height={26} key={i} once>
                   <div>
                     {line == "<span></span>" ? parse("&#8203;") : parse(line)}
                   </div>
