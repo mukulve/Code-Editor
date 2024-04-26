@@ -116,7 +116,6 @@ pub fn detect_changes() {
                         event.event.info().unwrap_or("").to_string(),
                     )
                     .unwrap();
-                    println!("event");
                 }),
                 Err(errors) => errors.iter().for_each(|error| println!("{error:?}")),
             },
@@ -142,7 +141,8 @@ pub fn detect_changes() {
             std::thread::sleep(Duration::from_secs(2));
 
             if path != *CURRENT_PATH.lock().unwrap() {
-                println!("path changed");
+                emit_event("alert_event".to_string(), "Directory Changed".to_string()).unwrap();
+
                 debouncer.cache().remove_root(Path::new(&path));
                 debouncer.watcher().unwatch(Path::new(&path)).unwrap();
             }
