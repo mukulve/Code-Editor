@@ -1,4 +1,4 @@
-function ThemeDialog() {
+export default function ThemeDialog() {
   let themes = [
     "default",
     "light",
@@ -58,5 +58,3 @@ function ThemeDialog() {
     </dialog>
   );
 }
-
-export default ThemeDialog;

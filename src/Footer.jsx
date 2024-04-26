@@ -5,7 +5,7 @@ import { faTableColumns } from "@fortawesome/free-solid-svg-icons";
 
 import EditorContext from "./EditorContext";
 
-function Footer({ sidePanelHandler, currentPanel }) {
+export default function Footer({ sidePanelHandler, currentPanel }) {
   const { openFiles, currentFile } = useContext(EditorContext);
 
   return (
@@ -27,5 +27,3 @@ function Footer({ sidePanelHandler, currentPanel }) {
     </footer>
   );
 }
-
-export default Footer;

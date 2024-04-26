@@ -10,7 +10,7 @@ import { useContext, useRef } from "react";
 import EditorContext from "./EditorContext";
 import { invoke } from "@tauri-apps/api/tauri";
 
-function CustomWindow() {
+export default function CustomWindow() {
   const { openFiles, currentFile, currentDirectory, OpenFolder } =
     useContext(EditorContext);
 
@@ -68,5 +68,3 @@ function CustomWindow() {
     </div>
   );
 }
-
-export default CustomWindow;

@@ -10,12 +10,16 @@ export default function Terminal() {
   const [commandOutput, setCommandOutput] = useState([]);
 
   async function sendCommand() {
-    const response = await invoke("run_command", {
-      command: command,
-      directory: currentDirectory,
-    });
-    setCommandOutput((commandOutput) => [...commandOutput, response]);
-    setCommand("");
+    try {
+      const response = await invoke("run_command", {
+        command: command,
+        directory: currentDirectory,
+      });
+      setCommandOutput((commandOutput) => [...commandOutput, response]);
+      setCommand("");
+    } catch (e) {
+      setCommandOutput((commandOutput) => [...commandOutput, e]);
+    }
   }
 
   return (

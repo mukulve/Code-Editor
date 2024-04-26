@@ -7,7 +7,7 @@ import {
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
-function SideTabs({ tabHandler }) {
+export default function SideTabs({ tabHandler }) {
   return (
     <aside className="w-fit bg-base-200 flex-none">
       <ul className="menu menu-xs bg-base-200 w-16 p-0 [&_li>*]: h-full">
@@ -33,5 +33,3 @@ function SideTabs({ tabHandler }) {
     </aside>
   );
 }
-
-export default SideTabs;

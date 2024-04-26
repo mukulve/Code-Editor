@@ -4,7 +4,7 @@ import { faClose } from "@fortawesome/free-solid-svg-icons";
 import FileIcon from "./FileIcon";
 import EditorContext from "./EditorContext";
 
-function FileTabs() {
+export default function FileTabs() {
   const { openFiles, setCurrentFile, currentFile, closeFile } =
     useContext(EditorContext);
 
@@ -37,5 +37,3 @@ function FileTabs() {
     </div>
   );
 }
-
-export default FileTabs;

@@ -53,9 +53,7 @@ export default function Editor() {
         </div>
       </main>
     );
-  }
-
-  if (openFiles.length == 0) {
+  } else if (openFiles.length == 0) {
     return (
       <main className="h-full w-full artboard">
         <div className="p-4 flex flex-col gap-4 justify-center items-center h-full w-full">
@@ -64,9 +62,9 @@ export default function Editor() {
         </div>
       </main>
     );
-  }
-
-  if (imagePreviewExtensions.includes(openFiles[currentFile].extension)) {
+  } else if (
+    imagePreviewExtensions.includes(openFiles[currentFile].extension)
+  ) {
     return (
       <main className="h-full w-full artboard">
         <FileTabs />
@@ -85,9 +83,7 @@ export default function Editor() {
         </div>
       </main>
     );
-  }
-
-  if (pdfPreviewExtensions.includes(openFiles[currentFile].extension)) {
+  } else if (pdfPreviewExtensions.includes(openFiles[currentFile].extension)) {
     return (
       <main className="h-full w-full artboard">
         <FileTabs />
@@ -106,9 +102,9 @@ export default function Editor() {
         </div>
       </main>
     );
-  }
-
-  if (videoPreviewExtensions.includes(openFiles[currentFile].extension)) {
+  } else if (
+    videoPreviewExtensions.includes(openFiles[currentFile].extension)
+  ) {
     return (
       <main className="h-full w-full artboard">
         <FileTabs />
@@ -127,20 +123,20 @@ export default function Editor() {
         </div>
       </main>
     );
+  } else {
+    return (
+      <main className="h-full w-full artboard">
+        <FileTabs />
+        <div
+          className="overflow-scroll w-full relative pb-40 "
+          style={{
+            height: "calc(100dvh - 45px - 30px - 32px)",
+          }}
+        >
+          <TextareaCodeEditor />
+          <Terminal />
+        </div>
+      </main>
+    );
   }
-
-  return (
-    <main className="h-full w-full artboard">
-      <FileTabs />
-      <div
-        className="overflow-scroll w-full relative pb-40 "
-        style={{
-          height: "calc(100dvh - 45px - 30px - 32px)",
-        }}
-      >
-        <TextareaCodeEditor />
-        <Terminal />
-      </div>
-    </main>
-  );
 }

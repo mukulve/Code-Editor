@@ -2,7 +2,7 @@ import InfoContext from "./InfoContext";
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState, useRef } from "react";
 
-function EditorProvider({ children }) {
+export default function EditorProvider({ children }) {
   const [alerts, setAlerts] = useState([]);
   const timeoutRef = useRef(null);
 
@@ -42,5 +42,3 @@ function EditorProvider({ children }) {
     </InfoContext.Provider>
   );
 }
-
-export default EditorProvider;

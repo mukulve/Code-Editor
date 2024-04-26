@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { open } from "@tauri-apps/api/dialog";
 import { useLocalStorage } from "usehooks-ts";
 
-function EditorProvider({ children }) {
+export default function EditorProvider({ children }) {
   const [openFiles, setOpenFiles] = useState([]);
   const [currentFile, setCurrentFile] = useState(null);
   const [currentDirectory, setCurrentDirectory] = useState(null);
@@ -94,5 +94,3 @@ function EditorProvider({ children }) {
     </EditorContext.Provider>
   );
 }
-
-export default EditorProvider;

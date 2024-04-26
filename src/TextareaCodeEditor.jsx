@@ -146,6 +146,7 @@ export default function TextareaCodeEditor() {
               <span className="text-primary"></span>
               <span className="text-secondary"></span>
               <span className="text-accent"></span>
+              <span class="text-accent underline"></span>
             </code>
           </pre>
         </div>
