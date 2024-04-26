@@ -10,7 +10,7 @@ use std::collections::HashSet;
 
 #[cached]
 pub fn highlight_line(content: String) -> String {
-    let declarations = vec!["fn", "let", "mut", "function", "var", "const"];
+    let declarations = vec!["fn", "let", "mut", "function", "var", "const", "pub"];
     let types = vec![
         "i32",
         "i64",
@@ -39,12 +39,36 @@ pub fn highlight_line(content: String) -> String {
         "undefined",
         "NaN",
         "Infinity",
+        "enum",
+        "struct",
+        "union",
+        "type",
+        "interface",
+        "class",
+        "Option",
     ];
     let loops = vec!["for", "while", "loop", "do", "break", "continue"];
     let conditions = vec!["if", "else", "match", "case", "default", "switch"];
     let keywords = vec![
-        "return", "yield", "await", "async", "try", "catch", "throw", "import", "export", "use",
-        "from", "public", "mod",
+        "return",
+        "yield",
+        "await",
+        "async",
+        "try",
+        "catch",
+        "throw",
+        "import",
+        "export",
+        "use",
+        "from",
+        "public",
+        "mod",
+        "pub",
+        "public",
+        "private",
+        "protected",
+        "static",
+        "final",
     ];
     let operators = vec![
         "+", "-", "*", "/", "%", "++", "--", "==", "!=", ">", "<", ">=", "<=", "&&", "||", "!",
@@ -68,6 +92,11 @@ pub fn highlight_line(content: String) -> String {
             new_words.push(format!("<span class=\"text-secondary\">{}</span>", word));
         } else if operators.contains(&word.as_str()) || word.parse::<f64>().is_ok() {
             new_words.push(format!("<span class=\"text-accent\">{}</span>", word));
+        } else if word.starts_with("http://") || word.starts_with("https://") {
+            new_words.push(format!(
+                "<span class=\"text-accent underline\">{}</span>",
+                word
+            ));
         } else {
             new_words.push(word);
         }
