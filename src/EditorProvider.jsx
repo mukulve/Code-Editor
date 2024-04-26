@@ -35,6 +35,7 @@ function EditorProvider({ children }) {
         name: file.name,
         content: readFileStruct.content,
         isBinary: readFileStruct.is_binary,
+        extension: file.path.split(".").pop(),
       },
     ]);
     setCurrentFile(openFiles.length);

@@ -5,9 +5,8 @@ import {
   faMaximize,
   faMinimize,
 } from "@fortawesome/free-solid-svg-icons";
-
 import { appWindow } from "@tauri-apps/api/window";
-import { useState, useContext, useEffect, useRef } from "react";
+import { useContext, useRef } from "react";
 import EditorContext from "./EditorContext";
 import { invoke } from "@tauri-apps/api/tauri";
 

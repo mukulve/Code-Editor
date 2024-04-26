@@ -4,7 +4,6 @@ import {
   faEyeDropper,
   faFile,
   faGear,
-  faGears,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 
@@ -12,7 +11,7 @@ function SideTabs({ tabHandler }) {
   return (
     <aside className="w-fit bg-base-200 flex-none">
       <ul className="menu menu-xs bg-base-200 w-16 p-0 [&_li>*]: h-full">
-        <li onClick={() => tabHandler(0)} className="p-2">
+        <li onClick={() => tabHandler(0)} className="p-2 ">
           <FontAwesomeIcon icon={faFile} className="text-xl" />
         </li>
         <li onClick={() => tabHandler(1)} className="p-2">

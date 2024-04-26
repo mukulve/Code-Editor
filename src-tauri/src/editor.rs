@@ -89,7 +89,7 @@ pub fn highlight_code(content: String) -> Result<Vec<String>, ()> {
     let lines: Vec<String> = regex.split(&new_content).map(|f| f.to_owned()).collect();
 
     //check if the content is very large
-    if content.len() > 100000 {
+    if lines.len() > 5000 {
         return Ok(lines);
     }
 

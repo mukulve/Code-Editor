@@ -2,6 +2,7 @@ import { useEffect, useState, useContext, useRef } from "react";
 import parse from "html-react-parser";
 import EditorContext from "./EditorContext";
 import { invoke } from "@tauri-apps/api/tauri";
+import LazyLoad from "react-lazy-load";
 
 export default function TextareaCodeEditor() {
   const { openFiles, currentFile, setOpenFiles } = useContext(EditorContext);
@@ -110,8 +111,10 @@ export default function TextareaCodeEditor() {
   return (
     <div className="relative text-left p-0 overflow-auto text-base font-mono leading-relaxed w-full h-full flex ">
       <div className="w-10 flex-none h-full select-none">
-        {codeArray.map((line, i) => (
-          <div key={i}>{i + 1}</div>
+        {codeArray.map((_, i) => (
+          <LazyLoad height={26} key={i}>
+            <div>{i + 1}</div>
+          </LazyLoad>
         ))}
       </div>
       <div>
@@ -133,10 +136,16 @@ export default function TextareaCodeEditor() {
         <div className="m-0 border-0 bg-transparent p-0 whitespace-nowrap break-keep min-h-20 text-base font-mono leading-relaxed h-fit ">
           <pre className="m-0 p-0">
             <code ref={editorRef}>
-              {parse(codeArray.join("\n"))}
-              <span class="text-primary"></span>
-              <span class="text-secondary"></span>
-              <span class="text-accent"></span>
+              {codeArray.map((line, i) => (
+                <LazyLoad height={26} key={i}>
+                  <div>
+                    {line == "<span></span>" ? parse("&#8203;") : parse(line)}
+                  </div>
+                </LazyLoad>
+              ))}
+              <span className="text-primary"></span>
+              <span className="text-secondary"></span>
+              <span className="text-accent"></span>
             </code>
           </pre>
         </div>

@@ -1,23 +1,48 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faClose,
   faFileCirclePlus,
   faFolderOpen,
 } from "@fortawesome/free-solid-svg-icons";
-import FileIcon from "./FileIcon";
 import EditorContext from "./EditorContext";
 import TextareaCodeEditor from "./TextareaCodeEditor";
 import Terminal from "./Terminal";
+import { convertFileSrc } from "@tauri-apps/api/tauri";
+import FileTabs from "./FileTabs";
 
-function Editor() {
-  const {
-    openFiles,
-    setCurrentFile,
-    currentFile,
-    closeFile,
-    currentDirectory,
-  } = useContext(EditorContext);
+export default function Editor() {
+  const [assetUrl, setAssetUrl] = useState(null);
+  const { openFiles, currentFile, currentDirectory } =
+    useContext(EditorContext);
+
+  const imagePreviewExtensions = [
+    "jpg",
+    "jpeg",
+    "jfif",
+    "pjpeg",
+    "pjp",
+    "ico",
+    "cur",
+    "gif",
+    "apng",
+    "png",
+    "svg",
+  ];
+  const pdfPreviewExtensions = ["pdf"];
+  const videoPreviewExtensions = ["mp4", "webm", "ogg"];
+
+  async function openFile() {
+    if (openFiles.length == 0) {
+      return;
+    }
+    let path = openFiles[currentFile].path;
+    const assetUrl = convertFileSrc(path);
+    setAssetUrl(assetUrl);
+  }
+
+  useEffect(() => {
+    openFile();
+  }, [openFiles, currentFile]);
 
   if (currentDirectory == null) {
     return (
@@ -41,36 +66,72 @@ function Editor() {
     );
   }
 
+  if (imagePreviewExtensions.includes(openFiles[currentFile].extension)) {
+    return (
+      <main className="h-full w-full artboard">
+        <FileTabs />
+        <div
+          className="overflow-scroll w-full relative pb-40 "
+          style={{
+            height: "calc(100dvh - 45px - 30px - 32px)",
+          }}
+        >
+          <img
+            src={assetUrl}
+            alt={openFiles[currentFile].name}
+            className="h-full w-full object-contain"
+          />
+          <Terminal />
+        </div>
+      </main>
+    );
+  }
+
+  if (pdfPreviewExtensions.includes(openFiles[currentFile].extension)) {
+    return (
+      <main className="h-full w-full artboard">
+        <FileTabs />
+        <div
+          className="overflow-scroll w-full relative pb-40 "
+          style={{
+            height: "calc(100dvh - 45px - 30px - 32px)",
+          }}
+        >
+          <embed
+            src={assetUrl}
+            type="application/pdf"
+            className="h-full w-full object-contain"
+          />
+          <Terminal />
+        </div>
+      </main>
+    );
+  }
+
+  if (videoPreviewExtensions.includes(openFiles[currentFile].extension)) {
+    return (
+      <main className="h-full w-full artboard">
+        <FileTabs />
+        <div
+          className="overflow-scroll w-full relative pb-40 "
+          style={{
+            height: "calc(100dvh - 45px - 30px - 32px)",
+          }}
+        >
+          <video
+            src={assetUrl}
+            controls
+            className="h-full w-full object-contain"
+          ></video>
+          <Terminal />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="h-full w-full artboard">
-      <div
-        className="flex w-full overflow-x-auto overflow-y-hidden"
-        style={{ height: "32px" }}
-      >
-        {openFiles.map((file, i) => (
-          <button
-            key={file.path}
-            className={`btn btn-sm flex-none ${
-              currentFile == i ? "btn-primary" : ""
-            }`}
-            onClick={() => setCurrentFile(i)}
-          >
-            <FileIcon file={file} />
-            {file.name}
-            <button
-              className={`btn btn-xs   ${
-                currentFile == i ? "btn-primary" : ""
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                closeFile(i);
-              }}
-            >
-              <FontAwesomeIcon icon={faClose} />
-            </button>
-          </button>
-        ))}
-      </div>
+      <FileTabs />
       <div
         className="overflow-scroll w-full relative pb-40 "
         style={{
@@ -79,16 +140,7 @@ function Editor() {
       >
         <TextareaCodeEditor />
         <Terminal />
-        {/*
-        
-        <div className="absolute top-0 bg-base-200">
-          <p>Suggestions</p>
-          <p>hello</p>
-        </div>
-        */}
       </div>
     </main>
   );
 }
-
-export default Editor;
