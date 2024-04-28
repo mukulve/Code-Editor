@@ -81,12 +81,13 @@ async fn setup() -> Result<String, errors::Error> {
         .header("editor-plugin-version", "copilot.vim/1.16.0")
         .header("content-type", "application/json")
         .header("user-agent", "GithubCopilot/1.155.0")
-        .header("accept-encoding", "gzip,deflate,br")
         .body("{\"client_id\":\"Iv1.b507a08c87ecfe98\",\"scope\":\"read:user\"}")
         .send()
         .await?
         .text()
         .await?;
+
+    println!("{}", res);
 
     let setup = serde_json::from_str::<Setup>(&res)?;
     let device_code = setup.device_code;
@@ -99,6 +100,9 @@ async fn setup() -> Result<String, errors::Error> {
     );
 
     loop {
+        //sleep for interval
+        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+
         let res = client
             .post("https://github.com/login/oauth/access_token")
             .header("accept", "application/json")
@@ -106,12 +110,13 @@ async fn setup() -> Result<String, errors::Error> {
             .header("editor-plugin-version", "copilot.vim/1.16.0")
             .header("content-type", "application/json")
             .header("user-agent", "GithubCopilot/1.155.0")
-            .header("accept-encoding", "gzip,deflate,br")
             .body(format!("{{\"client_id\":\"Iv1.b507a08c87ecfe98\",\"device_code\":\"{device_code}\",\"grant_type\":\"urn:ietf:params:oauth:grant-type:device_code\"}}"))
             .send()
             .await?
             .text()
             .await?;
+
+        println!("{}", res);
 
         let login = serde_json::from_str::<Login>(&res)?;
         if login.access_token.is_some() {
@@ -125,7 +130,8 @@ async fn setup() -> Result<String, errors::Error> {
     Ok(token)
 }
 
-async fn copilot(prompt: String, language: String) -> Result<String, errors::Error> {
+#[tauri::command]
+pub async fn copilot(prompt: String, language: String) -> Result<String, errors::Error> {
     let token = setup().await?;
     let client = reqwest::Client::new();
     let json = CopilotJson::new(prompt, language);

@@ -6,11 +6,9 @@ import EditorProvider from "./EditorProvider";
 import InfoProvider from "./InfoProvider";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <EditorProvider>
-      <InfoProvider>
-        <App />
-      </InfoProvider>
-    </EditorProvider>
-  </React.StrictMode>
+  <EditorProvider>
+    <InfoProvider>
+      <App />
+    </InfoProvider>
+  </EditorProvider>
 );

@@ -9,6 +9,7 @@ mod io;
 mod logging;
 mod terminal;
 
+use crate::copilot::copilot;
 use crate::editor::{get_suggestions, highlight_code};
 use crate::git::{
     does_git_exist, git_add, git_clone, git_commit, git_history, git_init, git_push, is_git_repo,
@@ -63,7 +64,8 @@ fn main() {
             get_suggestions,
             does_git_exist,
             is_git_repo,
-            git_clone
+            git_clone,
+            copilot
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
