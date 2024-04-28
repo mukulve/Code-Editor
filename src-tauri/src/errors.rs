@@ -12,6 +12,10 @@ pub enum Error {
     Regex(#[from] regex::Error),
     #[error(transparent)]
     Git2(#[from] git2::Error),
+    #[error(transparent)]
+    Reqwest(#[from] reqwest::Error),
+    #[error(transparent)]
+    SerdeJson(#[from] serde_json::Error),
 }
 
 // we must manually implement serde::Serialize

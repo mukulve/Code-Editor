@@ -14,6 +14,7 @@ dependencies = [
  "notify-debouncer-full",
  "rayon",
  "regex",
+ "reqwest",
  "serde",
  "serde_json",
  "tauri",

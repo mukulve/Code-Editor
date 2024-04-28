@@ -88,6 +88,8 @@ pub fn highlight_line(content: String) -> String {
         } else if types.contains(&word.as_str())
             || loops.contains(&word.as_str())
             || conditions.contains(&word.as_str())
+            || word.starts_with("\"")
+            || word.ends_with("\"")
         {
             new_words.push(format!("<span class=\"text-secondary\">{}</span>", word));
         } else if operators.contains(&word.as_str()) || word.parse::<f64>().is_ok() {
