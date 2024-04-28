@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCodeBranch,
+  faComments,
   faEyeDropper,
   faFile,
   faGear,
@@ -22,6 +23,9 @@ export default function SideTabs({ tabHandler }) {
         </li>
         <li onClick={() => tabHandler(3)} className="p-2">
           <FontAwesomeIcon icon={faGear} className="text-xl" />
+        </li>
+        <li onClick={() => tabHandler(4)} className="p-2">
+          <FontAwesomeIcon icon={faComments} className="text-xl" />
         </li>
         <li
           onClick={() => document.getElementById("my_modal_2").showModal()}

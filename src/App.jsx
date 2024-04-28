@@ -21,6 +21,7 @@ import { listen } from "@tauri-apps/api/event";
 import Git from "./Git";
 
 import EditorContext from "./EditorContext";
+import Copilot from "./Copilot";
 
 function App() {
   const { currentDirectory, OpenFolder } = useContext(EditorContext);
@@ -189,6 +190,8 @@ function App() {
               </footer>
             </div>
           )}
+
+          {currentDirectory != null && currentTab == 4 && <Copilot />}
         </aside>
         <div className="flex-initial w-full overflow-hidden">
           <Editor />
