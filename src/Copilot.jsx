@@ -59,7 +59,7 @@ export default function Copilot() {
                 chat.sender == "user"
                   ? "chat-bubble-primary"
                   : "chat-bubble-secondary"
-              } chat-bubble`}
+              } chat-bubble break-all`}
             >
               {chat.message}
             </div>
@@ -70,7 +70,7 @@ export default function Copilot() {
         <div className="join">
           <input
             className="input input-sm join-item"
-            placeholder="url"
+            placeholder="Ask Copilot..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />

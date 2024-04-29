@@ -22,7 +22,7 @@ export default function GitHistory() {
       <p className="menu-title">Git History</p>
       <ul>
         {gitHistory.map((commit) => (
-          <li>
+          <li key={commit} className="break-all">
             <p>{commit}</p>
           </li>
         ))}
