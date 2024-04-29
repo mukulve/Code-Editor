@@ -1,8 +1,47 @@
+use crate::{emit_event, errors};
+use lazy_static::lazy_static;
 use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
-use crate::errors;
+lazy_static! {
+    static ref ACCESSTOKEN: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
+}
 
 // Based on https://github.com/B00TK1D/copilot-api/ written in Python
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+struct TokenJson {
+    annotations_enabled: bool,
+    chat_enabled: bool,
+    chat_jetbrains_enabled: bool,
+    code_quote_enabled: bool,
+    codesearch: bool,
+    copilot_ide_agent_chat_gpt4_small_prompt: bool,
+    copilotignore_enabled: bool,
+    expires_at: i32,
+    individual: bool,
+    nes_enabled: bool,
+    prompt_8k: bool,
+    public_suggestions: String,
+    refresh_in: i32,
+    sku: String,
+    snippy_load_test_enabled: bool,
+    telemetry: String,
+    token: String,
+    tracking_id: String,
+    vsc_electron_fetcher: bool,
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+struct Extra {
+    language: String,
+}
+
+impl Extra {
+    fn new(language: String) -> Self {
+        Self { language }
+    }
+}
 
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 struct CopilotJson {
@@ -15,7 +54,7 @@ struct CopilotJson {
     stop: Vec<char>,
     nwo: String,
     stream: bool,
-    extra: HashMap<String, String>,
+    extra: Extra,
 }
 
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
@@ -54,8 +93,6 @@ struct Login {
 
 impl CopilotJson {
     fn new(prompt: String, language: String) -> Self {
-        let mut extra = HashMap::new();
-        extra.insert("language".to_string(), language);
         Self {
             prompt,
             suffix: "".to_string(),
@@ -66,12 +103,16 @@ impl CopilotJson {
             stop: vec!['\n'],
             nwo: "github/copilot.vim".to_string(),
             stream: true,
-            extra,
+            extra: Extra::new(language),
         }
     }
 }
 
 async fn setup() -> Result<String, errors::Error> {
+    if ACCESSTOKEN.lock().await.is_some() {
+        return Ok(ACCESSTOKEN.lock().await.clone().unwrap());
+    }
+
     let mut token = String::new();
     let client = reqwest::Client::new();
     let res = client
@@ -87,8 +128,6 @@ async fn setup() -> Result<String, errors::Error> {
         .text()
         .await?;
 
-    println!("{}", res);
-
     let setup = serde_json::from_str::<Setup>(&res)?;
     let device_code = setup.device_code;
     let user_code = setup.user_code;
@@ -98,6 +137,14 @@ async fn setup() -> Result<String, errors::Error> {
         "Please visit {} and enter the code {}",
         verification_uri, user_code
     );
+
+    emit_event(
+        "copilot-event".to_string(),
+        format!(
+            "Please visit {} and enter the code {}",
+            verification_uri, user_code
+        ),
+    )?;
 
     loop {
         //sleep for interval
@@ -116,8 +163,6 @@ async fn setup() -> Result<String, errors::Error> {
             .text()
             .await?;
 
-        println!("{}", res);
-
         let login = serde_json::from_str::<Login>(&res)?;
         if login.access_token.is_some() {
             token = login.access_token.unwrap();
@@ -125,14 +170,35 @@ async fn setup() -> Result<String, errors::Error> {
         }
     }
 
-    println!("Login successful");
+    emit_event("copilot-event".to_string(), "Logged in".to_string())?;
+
+    ACCESSTOKEN.lock().await.replace(token.clone());
 
     Ok(token)
 }
 
+async fn get_token() -> Result<String, errors::Error> {
+    let access_token = setup().await.unwrap();
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get("https://api.github.com/copilot_internal/v2/token")
+        .header("authorization", format!("token {}", access_token))
+        .header("editor-version", "Neovim/0.6.1")
+        .header("editor-plugin-version", "copilot.vim/1.16.0")
+        .header("user-agent", "GithubCopilot/1.155.0")
+        .send()
+        .await?
+        .text()
+        .await?;
+
+    let json = serde_json::from_str::<TokenJson>(&response)?;
+    Ok(json.token)
+}
+
 #[tauri::command]
 pub async fn copilot(prompt: String, language: String) -> Result<String, errors::Error> {
-    let token = setup().await?;
+    let token = get_token().await?;
     let client = reqwest::Client::new();
     let json = CopilotJson::new(prompt, language);
 
@@ -144,6 +210,8 @@ pub async fn copilot(prompt: String, language: String) -> Result<String, errors:
         .await?
         .text()
         .await?;
+
+    println!("{}", response);
 
     let mut result = String::new();
     let response_splitted = response.split("\n").collect::<Vec<&str>>();
