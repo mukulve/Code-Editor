@@ -9,7 +9,6 @@ export default function GitHistory() {
 
   async function getGitHistory() {
     let history = await invoke("git_history", { path: currentDirectory });
-    console.log(history);
     setGitHistory(history);
   }
 

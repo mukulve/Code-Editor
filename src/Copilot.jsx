@@ -21,7 +21,6 @@ export default function Copilot() {
       ...oldArray,
       { message: response, sender: "copilot" },
     ]);
-    console.log(response);
   }
 
   useEffect(() => {
