@@ -12,10 +12,23 @@ export default function EditorProvider({ children }) {
     "currentDirectory",
     null
   );
+  const [localLastOpenFiles, setLocalLastOpenFiles] = useLocalStorage(
+    "openFiles",
+    []
+  );
+
+  useEffect(() => {
+    setLocalLastOpenFiles(openFiles);
+  }, [openFiles]);
 
   useEffect(() => {
     if (localCurrentDirectory != null) {
       setCurrentDirectory(localCurrentDirectory);
+    }
+
+    if (localLastOpenFiles.length > 0) {
+      setOpenFiles(localLastOpenFiles);
+      setCurrentFile(0);
     }
   }, []);
 
