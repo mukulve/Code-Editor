@@ -107,7 +107,7 @@ pub fn search_directory(path: String, query: String) -> Result<Vec<SearchDirecto
 pub fn detect_changes() {
     let debouncer = Arc::new(Mutex::new(
         new_debouncer(
-            Duration::from_secs(10),
+            Duration::from_secs(5),
             None,
             |result: DebounceEventResult| match result {
                 Ok(events) => events.iter().for_each(|event| {
