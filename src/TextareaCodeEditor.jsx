@@ -137,11 +137,9 @@ export default function TextareaCodeEditor() {
           <pre className="m-0 p-0">
             <code ref={editorRef}>
               {codeArray.map((line, i) => (
-                <LazyLoad height={26} key={i} once>
-                  <div>
-                    {line == "<span></span>" ? parse("&#8203;") : parse(line)}
-                  </div>
-                </LazyLoad>
+                <div>
+                  {line == "<span></span>" ? parse("&#8203;") : parse(line)}
+                </div>
               ))}
               <span className="text-primary"></span>
               <span className="text-secondary"></span>
