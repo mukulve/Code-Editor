@@ -26,4 +26,4 @@ A simple lightweight code editor made with Tauri, Rust, React and DaisyUI
 
 - [ ] Complete Git functions in git.rs
 - [ ] Create a more sophisticated terminal backend
-      dfd
+      
