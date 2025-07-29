@@ -1,0 +1,231 @@
+html , body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: #1e1e1e;
+    overflow: hidden;
+}
+
+input {
+    color: white;
+    background: #2d2d2d;
+    border: 1px solid #444;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+/* === Identifiers & Types === */
+.token.identifier,
+.token.shorthand_property_identifier_pattern {
+    color: #9cdcfe;
+}
+
+.token.type_identifier,
+.token.builtin_type,
+.token.struct,
+.token.enum,
+.token.union {
+    color: #4ec9b0;
+}
+
+.token.field_identifier,
+.token.property_identifier,
+.token.attribute,
+.token.decorator {
+    color: #4ec9b0;
+}
+
+.token.variable,
+.token.variable_name {
+    color: #9cdcfe;
+}
+
+/* === Keywords === */
+.token.keyword,
+.token.control_keyword,
+.token.storage_modifier,
+.token.async,
+.token.await,
+.token.try,
+.token.catch,
+.token.yield,
+.token.break,
+.token.continue,
+.token.return,
+.token.default,
+.token.else,
+.token.if,
+.token.switch,
+.token.case,
+.token.for,
+.token.while,
+.token.do,
+.token.in,
+.token.of,
+.token.from,
+.token.to,
+.token.as {
+    color: #c586c0;
+}
+
+/* === Function & Method === */
+.token.function_item,
+.token.function,
+.token.method,
+.token.function_definition,
+.token.method_definition,
+.token.call_expression {
+    color: #dcdcaa;
+}
+
+/* === Constants, Booleans, Literals === */
+.token.const,
+.token.constant,
+.token.enum_constant,
+.token.boolean_literal {
+    color: #569cd6;
+}
+
+.token.null_literal {
+    color: #d4d4d4;
+}
+
+/* === Strings === */
+.token.string,
+.token.string_literal,
+.token.string_fragment,
+.token.string_literal_content,
+.token.string_content {
+    color: #ce9178;
+}
+
+.token.template_string {
+    color: #ce9178;
+}
+
+.token.escape_sequence {
+    color: #d7ba7d;
+}
+
+/* === Numbers === */
+.token.number,
+.token.float_literal,
+.token.integer_literal {
+    color: #b5cea8;
+}
+
+/* === Comments === */
+.token.comment,
+.token.line_comment,
+.token.block_comment,
+.token.doc_comment {
+    color: #6a9955;
+    font-style: italic;
+}
+
+/* === Import/Export === */
+.token.import,
+.token.export,
+.token.module {
+    color: #4ec9b0;
+}
+
+/* === Regex === */
+.token.regex,
+.token.regex_pattern {
+    color: #d16969;
+    font-style: italic;
+}
+
+/* === Error === */
+.token.ERROR {
+    background: rgba(255, 0, 0, 0.3);
+    color: #ff6b6b;
+    font-weight: bold;
+    text-decoration: underline wavy red;
+}
+
+/* === Operators === */
+.token.operator,
+.token.binary_expression,
+.token.unary_expression,
+.token.assignment_expression {
+    color: #d4d4d4;
+}
+
+.token.equal,
+.token.not_equal,
+.token.less_than,
+.token.greater_than,
+.token.less_than_equal,
+.token.greater_than_equal {
+    color: #d4d4d4;
+}
+
+/* === Booleans === */
+.token.true,
+.token.false {
+    color: #569cd6;
+}
+
+/* === Punctuation === */
+.token._7b, .token._7d { color: #ffd700; } /* { } */
+.token._28, .token._29 { color: #da70d6; } /* ( ) */
+.token._5b, .token._5d { color: #da70d6; } /* [ ] */
+.token._3b             { color: #d4d4d4; } /* ; */
+.token._2c             { color: #d4d4d4; } /* , */
+.token._3a             { color: #d4d4d4; } /* : */
+.token._22             { color: #ce9178; } /* " */
+.token._27             { color: #ce9178; } /* ' */
+.token._21             { color: #ff6b6b; } /* ! */
+.token._3f             { color: #ff6b6b; } /* ? */
+.token._2e             { color: #d4d4d4; } /* . */
+.token._2b             { color: #d4d4d4; } /* + */
+.token._2d             { color: #d4d4d4; } /* - */
+.token._2a             { color: #d4d4d4; } /* * */
+.token._2f             { color: #d4d4d4; } /* / */
+.token._3d             { color: #d4d4d4; } /* = */
+.token._26             { color: #d4d4d4; } /* & */
+.token._7c             { color: #d4d4d4; } /* | */
+.token._5e             { color: #d4d4d4; } /* ^ */
+.token._25             { color: #d4d4d4; } /* % */
+.token._7e             { color: #d4d4d4; } /* ~ */
+
+/* === Misc === */
+.token.tag_name,
+.token.tag {
+    color: #569cd6;
+}
+
+.token.attribute_name {
+    color: #9cdcfe;
+}
+
+.token.attribute_value {
+    color: #ce9178;
+}
+
+.token.class_name,
+.token.constructor {
+    color: #4ec9b0;
+}
+
+.token.namespace {
+    color: #b5cea8;
+}
+
+.token.parameter {
+    color: #9cdcfe;
+}
+
+.token.annotation {
+    color: #c586c0;
+}
+
+/* === Find Match Highlight === */
+.token.find-match {
+    background-color: #264f78;
+    border-radius: 3px;
+}
