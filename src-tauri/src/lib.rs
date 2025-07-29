@@ -1,12 +1,15 @@
 mod helper;
 mod structs;
+mod terminal;
 
 use crate::helper::{calculate_edit, collect, escape_html, get_language_object, sanitize_class};
-use crate::structs::{DirEntry, Editor, File, FileVersion};
+use crate::structs::{DirEntry, Editor, File, FileVersion, Terminal};
+use crate::terminal::{start_terminal, write_to_terminal};
 use cached::proc_macro::{cached, once};
 use lazy_static::lazy_static;
 use notify::{RecursiveMode, Watcher};
 use rayon::prelude::*;
+use tauri::Manager;
 use std::collections::HashMap;
 use std::fs::{self};
 use std::io::Read;
@@ -21,6 +24,7 @@ lazy_static! {
     static ref PARSERS: Mutex<HashMap<String, Parser>> = Mutex::new(HashMap::new());
     static ref TREES: Mutex<HashMap<String, Tree>> = Mutex::new(HashMap::new());
     static ref FILE_CONTENTS: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
+    pub static ref APP_HANDLE: Mutex<Option<tauri::AppHandle>> = Mutex::new(None);
 }
 
 impl FileVersion {
@@ -68,6 +72,14 @@ impl Clone for Editor {
             current_file: self.current_file.clone(),
             files: self.files.clone(),
             //watcher: None,
+        }
+    }
+}
+
+impl Terminal {
+    fn new() -> Terminal {
+        Terminal {
+            writer: None,
         }
     }
 }
@@ -388,33 +400,13 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
-            let menu = MenuBuilder::new(app)
-                .text("open", "Open")
-                .text("close", "Close")
-                .build()?;
-
-            app.set_menu(menu)?;
-
-            app.on_menu_event(move |app_handle: &tauri::AppHandle, event| {
-                println!("menu event: {:?}", event.id());
-
-                match event.id().0.as_str() {
-                    "open" => {
-                        println!("open event");
-                    }
-                    "close" => {
-                        println!("close event");
-                    }
-                    _ => {
-                        println!("unexpected menu event");
-                    }
-                }
-            });
-
+            let mut app_handle = APP_HANDLE.lock().unwrap();
+            *app_handle = Some(app.app_handle().clone());
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
         .manage(Arc::new(Mutex::new(Editor::new())))
+        .manage(Arc::new(Mutex::new(Terminal::new())))
         .invoke_handler(tauri::generate_handler![
             highlight_ast,
             get_opened_files,
@@ -424,7 +416,9 @@ pub fn run() {
             search_files_by_name,
             find_matches_in_file,
             highlight_html,
-            change_directory
+            change_directory,
+            write_to_terminal,
+            start_terminal
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

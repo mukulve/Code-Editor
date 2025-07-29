@@ -13,6 +13,7 @@ import { debounce } from 'lodash'
 
 import { onUnmounted } from 'vue'
 import { PhX, PhArrowDown, PhArrowUp } from "@phosphor-icons/vue";
+import Terminal from "./components/Terminal.vue";
 
 
 const editor = useEditorStore();
@@ -289,7 +290,9 @@ function goToNextMatch(reverse = false) {
 
 <template>
     <main>
-        <Nav v-model:count-ref="page" />
+        <div class="nav">
+            <Nav v-model:count-ref="page" />
+        </div>
         <div class="directoryTree" v-if="page === 0">
             <span>{{ currentFolder }}</span>
             <div v-for="item in directoryTree" :key="item.path">
@@ -344,6 +347,9 @@ function goToNextMatch(reverse = false) {
                     </li>
                 </ul>
                 <pre class="highlighted-area" v-html="highlightedHtml"></pre>
+            </div>
+            <div class="terminal">
+                <Terminal/>
             </div>
         </div>
     </main>
@@ -467,12 +473,14 @@ function goToNextMatch(reverse = false) {
 }
 
 .directoryTree {
-    display: flex;
-    flex-direction: column;
-    width: 200px;
-    overflow: scroll;
-    height: calc(100vh - 20px);
-    background: #1e1e1e;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 200px;
+  max-width: 200px;
+  min-width: 200px;
+  height: calc(100vh - 20px);
+  background: #1e1e1e;
+  overflow: auto;
 }
 
 .directoryTree span {
@@ -541,11 +549,19 @@ main {
 .editor-container {
     position: relative;
     width: 100%;
-    height: calc(100vh - 20px - 30px);
+    height: calc(100vh - 20px - 30px - 200px);
     background: #1e1e1e;
     color: white;
     border: 1px solid #333;
     overflow: hidden;
+}
+
+.terminal {
+    height: 200px;
+    width: 100%;
+    z-index: 3;
+    background: #1e1e1e;
+    border-top: 1px solid #333;
 }
 
 /* Shared font properties to ensure identical rendering */

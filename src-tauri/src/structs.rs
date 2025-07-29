@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::SystemTime};
+use std::{fmt::Write, path::PathBuf, sync::{Arc, Mutex}, time::SystemTime};
 
 use serde::{Deserialize, Serialize};
 
@@ -33,4 +33,9 @@ pub struct Editor {
     pub files: Vec<File>,
     //#[serde(skip_serializing, skip_deserializing)]
     //watcher: Option<Box<dyn Watcher>>,
+}
+
+pub struct Terminal {
+    pub writer: Option<Arc<Mutex<Box<dyn std::io::Write + Send + 'static>>>>,
+    // other fields...
 }

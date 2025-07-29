@@ -44,7 +44,9 @@ import {PhFiles, PhGear, PhGitBranch, PhMagnifyingGlass, PhPuzzlePiece, PhFolder
 .nav {
     display: flex;
     flex-direction: column;
-    width: 40px;
+    flex: 0 0 40px;
+    max-width: 40px;
+    min-width: 40px;
     background: #1e1e1e;
     color: white;
     max-height: 100vh;
