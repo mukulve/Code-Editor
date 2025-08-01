@@ -28,8 +28,8 @@ footer {
     display: flex;
     align-items: center;
     height: 20px;
-    background: #1e1e1e;
-    color: white;
+    background: var(--editor-background);
+    color: var(--editor-foreground);
     overflow: hidden;
 }
 footer span {

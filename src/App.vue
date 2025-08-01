@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import Nav from "./components/Nav.vue";
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, computed } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import Folder from "./components/Folder.vue";
 import File from "./components/File.vue";
 import Footer from "./components/Footer.vue";
+import Git from "./components/Git.vue";
+import UnderWork from "./components/UnderWork.vue";
 import "./main.css";
 import { useEditorStore } from "./stores/editor";
 import { watch } from "vue";
@@ -14,6 +16,7 @@ import { debounce } from 'lodash'
 import { onUnmounted } from 'vue'
 import { PhX, PhArrowDown, PhArrowUp } from "@phosphor-icons/vue";
 import Terminal from "./components/Terminal.vue";
+import { listen } from "@tauri-apps/api/event";
 
 
 const editor = useEditorStore();
@@ -33,7 +36,15 @@ const suggestions = ref<string[]>([])
 const showSuggestions = ref(false)
 const selectedSuggestionIndex = ref(0)
 const suggestionBoxStyle = ref({ top: "0px", left: "0px" })
-const staticCompletions = ["fn", "let", "mut", "main", "String", "println!", "Result", "Ok", "Err"]
+const staticCompletions = computed(() => {
+    const content = editor.activeFileContent;
+    const matches = content.match(/\b[a-zA-Z_][a-zA-Z0-9_]*\b/g) || [];
+    const freqMap: Record<string, number> = {};
+    for (const word of matches) {
+        freqMap[word] = (freqMap[word] || 0) + 1;
+    }
+    return [...new Set(matches)].sort((a, b) => (freqMap[b] ?? 0) - (freqMap[a] ?? 0));
+});
 
 //On mount 
 onMounted(() => {
@@ -79,6 +90,15 @@ const searchDirectoryTreeDebounce = debounce((query: string) => {
     searchDirectoryTree(query);
 }, 300)
 
+const getDirectoryTreeDebounce = debounce(() => {
+    getDirectoryTree();
+}, 1000)
+
+//tauri listens 
+listen("directory-event", () => {
+    getDirectoryTreeDebounce();
+});
+
 //keyboard shortcuts
 window.addEventListener("keydown", (event) => {
     if (!showSuggestions.value) return;
@@ -117,7 +137,6 @@ function handleFindShortcut(event: KeyboardEvent) {
 function handleKeyDown(event: KeyboardEvent) {
     if (event.metaKey && event.key.toLowerCase() === 'p') {
         event.preventDefault()
-        console.log('Meta + P was pressed!')
         fileSearchPopUpVisible.value = !fileSearchPopUpVisible.value;
     }
 }
@@ -125,7 +144,6 @@ function handleKeyDown(event: KeyboardEvent) {
 //invokes
 async function searchDirectoryTree(query: string) {
     if (!query.trim()) {
-        console.log("Empty search query, skipping.");
         return;
     }
 
@@ -137,7 +155,6 @@ async function searchDirectoryTree(query: string) {
 
 async function searchFilesByName(query: string) {
     if (!query.trim()) {
-        console.log("Empty search query, skipping.");
         return;
     }
 
@@ -153,6 +170,25 @@ async function getDirectoryTree() {
     directoryTree.value = tree.children as any[];
 }
 
+async function highlightCode() {
+    const language = getLanguage(editor.activeFile?.path || "");
+    const code = editor.activeFileContent;
+
+    const result:string = await invoke("highlight_html", {
+    code,
+    language,
+    matches: findMatches.value,
+    queryLen: findQuery.value.length,
+    path: editor.activeFile?.path
+    });
+
+    if (code.endsWith('\n')) {
+        highlightedHtml.value = result + '&nbsp;';
+    } else {
+        highlightedHtml.value = result;
+    }
+}
+
 //watches 
 
 watch(
@@ -164,26 +200,21 @@ watch(
 
 watch(
     () => editor.currentDirectoryPath,
-    (newPath) => {
-        console.log("Current directory changed to: " + newPath);
+    () => {
         getDirectoryTree();
     },
 );
 
-async function highlightCode() {
-  const language = getLanguage(editor.activeFile?.path || "");
-  const code = editor.activeFileContent;
+watch(
+    () => editor.activeFilePath,
+    (newPath) => {
+        if (newPath == "") {
+            highlightedHtml.value = "";
+        }
+    },
+);
 
-  const result:string = await invoke("highlight_html", {
-    code,
-    language,
-    matches: findMatches.value,
-    queryLen: findQuery.value.length,
-    path: editor.activeFile?.path
-  });
 
-  highlightedHtml.value = result;
-}
 
 //helpers
 function getLanguage(path: string) {
@@ -209,13 +240,13 @@ function updateCursor() {
         const lastWord = text.split(/\s+/).pop() || ""
 
         if (lastWord.length > 0) {
-            suggestions.value = staticCompletions.filter(s =>
-                s.startsWith(lastWord)
+            suggestions.value = staticCompletions.value.filter(s =>
+                s.startsWith(lastWord) && s != lastWord
             ).slice(0, 5)
 
             if (suggestions.value.length > 0) {
                 showSuggestions.value = true
-                selectedSuggestionIndex.value = 0
+                //selectedSuggestionIndex.value = 0
 
                 const lines = text.slice(0, cursorPosition.value).split("\n")
                 const lineHeight = 21
@@ -310,17 +341,24 @@ function goToNextMatch(reverse = false) {
         </div>
         <div class="directoryTree" v-if="page === 2">
             <span>Git</span>
+            <Git />
         </div>
         <div class="directoryTree" v-if="page === 3">
             <span>Extensions</span>
+            <UnderWork/>
         </div>
         <div class="directoryTree" v-if="page === 4">
             <span>Settings</span>
+            <UnderWork/>
+        </div>
+         <div class="directoryTree" v-if="page === 5">
+            <span>Chat Bot</span>
+            <UnderWork/>
         </div>
         <div class="editor" >
             <div class="editor-header">
                 <div v-for="file in editor.openFiles" :key="file.path">
-                    <div class="file-tab">
+                    <div class="file-tab" :class="{ 'tab-active': file.path === editor.activeFilePath }">
                         <button @click="editor.openFile(file)">
                             {{ file.name }}
                         </button>
@@ -372,8 +410,8 @@ function goToNextMatch(reverse = false) {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #2d2d2d;
-    border: 1px solid #444;
+    background: var(--editor-background);
+    border: 1px solid var(--editor-foreground);
     padding: 5px;
     border-radius: 4px;
     display: flex;
@@ -383,31 +421,27 @@ function goToNextMatch(reverse = false) {
 }
 
 .find-bar input {
-    background: #1e1e1e;
-    border: 1px solid #555;
-    color: white;
+    background: var(--editor-background);
+    border: 1px solid var(--editor-background);
+    color: var(--editor-foreground);
     padding: 2px 6px;
     width: 140px;
     font-size: 14px;
 }
 
 .find-bar button {
-    background: #444;
-    color: white;
+    background: var(--editor-background);
+    color: var(--editor-foreground);
     border: none;
     padding: 2px 6px;
     cursor: pointer;
     border-radius: 3px;
 }
 
-.find-bar button:hover {
-    background: #555;
-}
-
 .suggestion-box {
     position: absolute;
-    background: #1e1e1e;
-    border: 1px solid #444;
+    background: var(--editor-background);
+    border: 1px solid var(--editor-foreground);
     color: white;
     list-style: none;
     padding: 4px 0;
@@ -447,7 +481,7 @@ function goToNextMatch(reverse = false) {
 }
 
 .modal {
-    background: #1e1e1e;
+    background: var(--editor-background);
     border: 1px solid #333;
     padding: 20px;
     border-radius: 8px;
@@ -460,9 +494,9 @@ function goToNextMatch(reverse = false) {
 .modal-search-input {
     width: 100%;
     font-size: 16px;
-    background: #2d2d2d;
+    background: var(--editor-background);
     border: 1px solid #444;
-    color: white;
+    color: var(--editor-foreground);
     border-radius: 4px;
     margin-bottom: 10px;
 }
@@ -479,12 +513,13 @@ function goToNextMatch(reverse = false) {
   max-width: 200px;
   min-width: 200px;
   height: calc(100vh - 20px);
-  background: #1e1e1e;
+  background: var(--editor-background);
   overflow: auto;
 }
 
 .directoryTree span {
     font-size: smaller;
+    color: var(--editor-foreground);
 }
 
 main {
@@ -495,63 +530,36 @@ main {
     display: flex;
     gap: 10px;
     align-items: center;
-    background: #333;
     color: white;
     height: 30px;
+}
+
+.tab-active {
+    border-top: 3px solid #9cdcfe;
 }
 
 .editor-header button {
     background: transparent;
     border: none;
-    color: white;
+    color: var(--editor-foreground);
     padding: 5px 10px;
     cursor: pointer;
-}
-
-.editor-header button:hover {
-    background: #444;
-}
-
-.editor-header button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(173, 214, 255, 0.3);
-}
-
-.editor-header button:active {
-    background: #555;
-}
-
-.editor-header button:disabled {
-    color: #888;
-    cursor: not-allowed;
-}
-
-.editor-header button:disabled:hover {
-    background: transparent;
-}
-
-.editor-header button:disabled:focus {
-    box-shadow: none;
-}
-
-.editor-header button:disabled:active {
-    background: transparent;
 }
 
 .editor {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #252526;
-    color: white;
+    background: var(--editor-background);
+    color: var(--editor-foreground);
 }
 
 .editor-container {
     position: relative;
     width: 100%;
     height: calc(100vh - 20px - 30px - 200px);
-    background: #1e1e1e;
-    color: white;
+    background: var(--editor-background);
+    color: var(--editor-foreground);
     border: 1px solid #333;
     overflow: hidden;
 }
@@ -560,8 +568,9 @@ main {
     height: 200px;
     width: 100%;
     z-index: 3;
-    background: #1e1e1e;
+    background: black;
     border-top: 1px solid #333;
+    overflow: auto;
 }
 
 /* Shared font properties to ensure identical rendering */
@@ -572,7 +581,7 @@ main {
         "Menlo", "Consolas", monospace;
     font-size: 14px;
     font-weight: 400;
-    line-height: 1.5;
+    line-height: 21px; 
     letter-spacing: 0;
     word-spacing: normal;
     tab-size: 2;
@@ -596,7 +605,7 @@ main {
     word-wrap: normal;
     word-break: normal;
     overflow: auto;
-    color: white;
+    color: var(--editor-foreground);
     z-index: 1;
     background: transparent;
     box-sizing: border-box;
@@ -619,14 +628,13 @@ main {
     outline: none;
     background: transparent;
     color: transparent;
-    caret-color: #ffffff;
+    caret-color: var(--editor-foreground);
     z-index: 2;
     overflow: auto;
     white-space: pre;
     word-wrap: normal;
     word-break: normal;
     box-sizing: border-box;
-    text-rendering: optimizeSpeed;
 }
 
 /* Empty line helper - invisible but takes up space */
@@ -636,16 +644,13 @@ main {
     line-height: 1.5;
     display: inline;
 }
-
 /* Selection styling for the textarea */
 .input-area::selection {
-    background: rgba(173, 214, 255, 0.3);
-    color: transparent;
+    background: var(--selection-background);
 }
 
 .input-area::-moz-selection {
-    background: rgba(173, 214, 255, 0.3);
-    color: transparent;
+    background: var(--selection-background);
 }
 
 /* Ensure consistent scrollbars */
@@ -657,22 +662,23 @@ main {
 
 .input-area::-webkit-scrollbar-track,
 .highlighted-area::-webkit-scrollbar-track {
-    background: #252526;
+    background: var(--scrollbar-trackBackground);
 }
 
 .input-area::-webkit-scrollbar-thumb,
 .highlighted-area::-webkit-scrollbar-thumb {
-    background: #424242;
+    background: var(--scrollbar-thumbBackground);
     border-radius: 4px;
 }
 
 .input-area::-webkit-scrollbar-thumb:hover,
 .highlighted-area::-webkit-scrollbar-thumb:hover {
-    background: #4f4f4f;
+    background: var(--scrollbar-thumbHoverBackground);
 }
 
 .input-area::-webkit-scrollbar-corner,
 .highlighted-area::-webkit-scrollbar-corner {
-    background: #252526;
+    background: var(--scrollbar-cornerBackground);
 }
+
 </style>

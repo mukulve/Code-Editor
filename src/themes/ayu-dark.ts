@@ -1,0 +1,53 @@
+export const ayuDark = {
+  name: "ayuDark",
+  colors: {
+    "token.identifier": "#e6b450",
+    "token.variable": "#ffcc66",
+    "token.keyword": "#ffad66",
+    "token.function": "#ffd580",
+    "token.string": "#b8cc52",
+    "token.number": "#d4bfff",
+    "token.comment": "#5c6773",
+    "token.operator": "#ffb454",
+    "token.class_name": "#73d0ff",
+    "token.annotation": "#d4bfff",
+
+    // punctuation
+    "token._7b": "#ffb454",
+    "token._7d": "#ffb454",
+    "token._28": "#ffb454",
+    "token._29": "#ffb454",
+    "token._5b": "#ffb454",
+    "token._5d": "#ffb454",
+    "token._3b": "#c5c8c6",
+    "token._2c": "#c5c8c6",
+    "token._3a": "#c5c8c6",
+    "token._22": "#b8cc52",
+    "token._27": "#b8cc52",
+    "token._21": "#ffad66",
+    "token._3f": "#ffad66",
+    "token._2e": "#c5c8c6",
+    "token._2b": "#ffb454",
+    "token._2d": "#ffb454",
+    "token._2a": "#ffb454",
+    "token._2f": "#ffb454",
+    "token._3d": "#ffb454",
+    "token._26": "#ffb454",
+    "token._7c": "#ffb454",
+    "token._5e": "#ffb454",
+    "token._25": "#ffb454",
+    "token._7e": "#ffb454",
+
+    // editor UI
+    "editor.background": "#0f1419",
+    "editor.foreground": "#c5c8c6",
+    "activityBar.background": "#0f1419",
+    "sideBar.background": "#0f1419",
+    "statusBar.background": "#0f1419",
+    "selection.background": "#253340",
+    "scrollbar.trackBackground": "#0f1419",
+    "scrollbar.thumbBackground": "#2d3a45",
+    "scrollbar.thumbHoverBackground": "#3c4b57",
+    "scrollbar.cornerBackground": "#0f1419"
+  }
+};

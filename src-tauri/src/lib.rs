@@ -1,235 +1,36 @@
 mod helper;
 mod structs;
 mod terminal;
+mod impls;
+mod cache;
+mod errors;
 
+use crate::errors::GlobalError;
 use crate::helper::{calculate_edit, collect, escape_html, get_language_object, sanitize_class};
-use crate::structs::{DirEntry, Editor, File, FileVersion, Terminal};
+use crate::structs::{DirEntry, Editor, File, Terminal};
 use crate::terminal::{start_terminal, write_to_terminal};
-use cached::proc_macro::{cached, once};
+use cached::proc_macro::cached;
 use lazy_static::lazy_static;
-use notify::{RecursiveMode, Watcher};
-use rayon::prelude::*;
 use tauri::Manager;
 use std::collections::HashMap;
-use std::fs::{self};
 use std::io::Read;
-use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-use std::time::SystemTime;
-use tauri::menu::MenuBuilder;
+use std::time::Instant;
 use tree_sitter::{Parser, Tree};
-use walkdir::WalkDir;
 
 lazy_static! {
     static ref PARSERS: Mutex<HashMap<String, Parser>> = Mutex::new(HashMap::new());
     static ref TREES: Mutex<HashMap<String, Tree>> = Mutex::new(HashMap::new());
     static ref FILE_CONTENTS: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
     pub static ref APP_HANDLE: Mutex<Option<tauri::AppHandle>> = Mutex::new(None);
-}
 
-impl FileVersion {
-    fn new(content: String) -> FileVersion {
-        FileVersion {
-            content,
-            timestamp: SystemTime::now(),
-        }
-    }
-}
-
-impl File {
-    fn new(name: String, path: PathBuf, content: String) -> File {
-        File {
-            name,
-            path,
-            original_content: content.clone(),
-            versions: vec![FileVersion::new(content)],
-        }
-    }
-
-    fn add_version(&mut self, content: String) {
-        self.versions.push(FileVersion::new(content));
-    }
-}
-
-impl std::fmt::Debug for Editor {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Editor")
-            .field("current_directory", &self.current_directory)
-            .field("files_opened", &self.files_opened)
-            .field("current_file", &self.current_file)
-            .field("files", &self.files)
-            .field("watcher", &"<watcher>")
-            .finish()
-    }
-}
-
-impl Clone for Editor {
-    fn clone(&self) -> Self {
-        Editor {
-            current_directory: self.current_directory.clone(),
-            files_opened: self.files_opened.clone(),
-            folders_opened: self.folders_opened.clone(),
-            current_file: self.current_file.clone(),
-            files: self.files.clone(),
-            //watcher: None,
-        }
-    }
-}
-
-impl Terminal {
-    fn new() -> Terminal {
-        Terminal {
-            writer: None,
-        }
-    }
-}
-
-impl Editor {
-    fn new() -> Editor {
-        let mut editor = Editor {
-            current_directory: std::env::current_dir().unwrap(),
-            folders_opened: Vec::new(),
-            files_opened: Vec::new(),
-            current_file: None,
-            files: Vec::new(),
-            // watcher: None,
-        };
-
-        //editor.setup_watcher();
-        return editor;
-    }
-
-    fn setup_watcher(&mut self) {
-        let watcher = notify::recommended_watcher(
-            move |res: Result<notify::Event, notify::Error>| match res {
-                Ok(event) => {
-                    println!("Event: {:?}", event)
-                }
-                Err(e) => eprintln!("Error: {:?}", e),
-            },
-        )
-        .unwrap();
-
-        let mut boxed_watcher = Box::new(watcher);
-        boxed_watcher
-            .watch(&self.current_directory, RecursiveMode::Recursive)
-            .unwrap();
-        //self.watcher = Some(boxed_watcher);
-    }
-
-    fn open_file(&mut self, file: File) {
-        self.files_opened.push(file.clone());
-        self.current_file = Some(file);
-    }
-
-    fn read_file<P: AsRef<Path>>(&self, path: P) -> std::io::Result<String> {
-        let path = path.as_ref();
-        fs::read_to_string(path)
-    }
-
-    fn save_current_file(&mut self, content: String) {
-        if let Some(ref mut file) = self.current_file {
-            file.add_version(content);
-        }
-    }
-
-    fn change_directory(&mut self, path: String) {
-        self.current_directory = PathBuf::from(path);
-        //self.setup_watcher();
-    }
-
-    fn search_files_by_name(&mut self, query: String) -> Vec<File> {
-        let current_directory = self.current_directory.clone();
-
-        WalkDir::new(&current_directory)
-            .into_iter()
-            .par_bridge()
-            .filter_map(|e| e.ok())
-            .map(|e| {
-                let path = e.path().to_path_buf();
-                let file_name = e
-                    .path()
-                    .file_name()
-                    .map(|n| n.to_string_lossy().into_owned())
-                    .unwrap();
-                (path, file_name)
-            })
-            .filter(|e| e.1.contains(&query))
-            .map(|e| {
-                File::new(
-                    e.0.file_name()
-                        .map(|n| n.to_string_lossy().into_owned())
-                        .unwrap_or_else(|| String::from("")),
-                    e.0.to_path_buf(),
-                    String::new(),
-                )
-            })
-            .collect::<Vec<File>>()
-    }
-
-    fn search_files(&mut self, query: String) -> Vec<File> {
-        let current_directory = self.current_directory.clone();
-
-        WalkDir::new(&current_directory)
-            .into_iter()
-            .par_bridge()
-            .filter_map(|e| e.ok())
-            .map(|e| {
-                let path = e.path();
-                let content = fs::read_to_string(&path).unwrap_or_default();
-                (e, content)
-            })
-            .filter(|e| e.1.contains(&query))
-            .map(|e| {
-                File::new(
-                    e.0.file_name().to_string_lossy().into_owned(),
-                    e.0.path().to_path_buf(),
-                    String::new(),
-                )
-            })
-            .collect::<Vec<File>>()
-    }
-
-    fn get_directory_tree<P: AsRef<Path>>(&mut self, path: P) -> std::io::Result<DirEntry> {
-        let path = path.as_ref();
-        let metadata = fs::metadata(path)?;
-
-        let name = path
-            .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_else(|| path.to_string_lossy().into_owned());
-
-        let is_dir = metadata.is_dir();
-        let mut entry = DirEntry {
-            name,
-            path: path.to_string_lossy().into_owned(),
-            is_dir,
-            children: None,
-        };
-
-        if is_dir {
-            let mut children = Vec::new();
-            for entry in fs::read_dir(path)? {
-                let entry = entry?;
-                let child_path = entry.path();
-
-                if let Ok(child) = self.get_directory_tree(&child_path) {
-                    if child.name.starts_with('.') {
-                        continue;
-                    }
-                    children.push(child);
-                }
-            }
-            entry.children = Some(children);
-        }
-
-        Ok(entry)
-    }
+    pub static ref DIRECTORY_CACHE: Mutex<DirEntry> = Mutex::new(DirEntry::new());
+    pub static ref FILES_CACHE: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
 }
 
 #[tauri::command]
-#[cached]
-fn highlight_ast(code: String, language: String, path: String) -> Vec<(usize, usize, String)> {
+fn highlight_ast(code: String, language: String, path: String) -> Result<Vec<(usize, usize, String)>, GlobalError> {
+    
     let mut parsers = PARSERS.lock().unwrap();
     let mut trees = TREES.lock().unwrap();
     let mut file_contents = FILE_CONTENTS.lock().unwrap();
@@ -237,7 +38,7 @@ fn highlight_ast(code: String, language: String, path: String) -> Vec<(usize, us
     if !parsers.contains_key(&language) {
         let mut parser = Parser::new();
         let lang = get_language_object(&language);
-        parser.set_language(&lang).unwrap();
+        parser.set_language(&lang)?;
         parsers.insert(language.clone(), parser);
     }
 
@@ -259,10 +60,10 @@ fn highlight_ast(code: String, language: String, path: String) -> Vec<(usize, us
         file_contents.insert(path.clone(), code.clone());
         let mut results = vec![];
         collect(tree.root_node(), &code, &mut results);
-        return results;
+        return Ok(results);
     }
 
-    return vec![];
+    return Ok(vec![]);
 }
 
 #[tauri::command]
@@ -278,13 +79,16 @@ fn highlight_html(
         return String::new();
     }
 
-    if code.len() > 1000000 {
+    if code.len() > 500000 {
         return escape_html(&code).replace("\n\n", "\n<span class=\"empty-line\"> </span>\n");
     }
 
-    let spans = highlight_ast(code.clone(), language, path);
+    let spans = match  highlight_ast(code.clone(), language, path) {
+        Ok(spans) => spans,
+        Err(_) => return escape_html(&code).replace("\n\n", "\n<span class=\"empty-line\"> </span>\n"),
+    };
 
-    let mut html = String::new();
+    let mut html = String::with_capacity(code.len() * 2); 
     let mut last_index = 0;
 
     let match_set: std::collections::HashSet<(usize, usize)> =
@@ -335,15 +139,22 @@ fn get_opened_files(editor: tauri::State<Arc<Mutex<Editor>>>) -> Vec<File> {
 fn get_directory_tree(editor: tauri::State<Arc<Mutex<Editor>>>) -> Result<DirEntry, String> {
     let mut editor = editor.lock().unwrap();
     let current_directory = editor.current_directory.clone();
-    println!("current directory: {:#?}", current_directory);
-    editor
+    let directory = editor
         .get_directory_tree(&current_directory)
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string());
+    directory
 }
 
 #[tauri::command]
 fn read_file_content(path: String) -> Result<String, String> {
-    let mut f = std::fs::File::open(path).unwrap();
+    let mut f = match  std::fs::File::open(path.clone()) {
+        Ok(f) => f,
+        Err(e) => {
+            FILES_CACHE.lock().unwrap().remove(&path);
+            return Err(format!("Failed to open file: {}", e));
+        },
+    };
+
     let mut buffer = String::new();
 
     match f.read_to_string(&mut buffer) {
@@ -395,6 +206,12 @@ fn find_matches_in_file(content: String, query: String) -> Vec<usize> {
     indices
 }
 
+#[tauri::command]
+fn get_git_changes(editor: tauri::State<Arc<Mutex<Editor>>>) -> Result<Vec<String>, GlobalError> {
+    let mut editor = editor.lock().unwrap();
+    editor.get_git_changes()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -418,7 +235,8 @@ pub fn run() {
             highlight_html,
             change_directory,
             write_to_terminal,
-            start_terminal
+            start_terminal,
+            get_git_changes
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

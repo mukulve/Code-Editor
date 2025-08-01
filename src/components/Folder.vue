@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import File from './File.vue';
+import {folders} from "../folder.ts"
 
 import {
   ContextMenuCheckboxItem,
@@ -19,7 +20,7 @@ import {
 } from "reka-ui";
 import { ref } from "vue";
 
-defineProps<{
+const props = defineProps<{
   item: {
     name: string;
     path: string;
@@ -41,6 +42,25 @@ function toggleFolder() {
   folderOpen.value = !folderOpen.value;
 }
 
+function getIcon() {
+  for (let i = 0; i < folders.supported.length; i++) {
+    if (folders.supported[i].extensions.includes(props.item.name)) {
+      return "folder_type_" + folders.supported[i].icon + ".svg";
+    }
+  }
+
+  return "default_folder.svg";
+}
+
+function getIconUrl(fileName: string) {
+  let url = new URL(`../assets/icons/${fileName}`, import.meta.url).href;
+  if (url.includes("undefined")) {
+    return new URL(`../assets/icons/default_folder.svg`, import.meta.url).href;
+  }
+  return new URL(`../assets/icons/${fileName}`, import.meta.url).href;
+}
+
+
 import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
 </script>
 
@@ -51,8 +71,7 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
         <div class="flex" @click.stop="toggleFolder">
          <PhCaretRight v-if="!folderOpen"/>
          <PhCaretDown v-else/> 
-          <img v-if="!folderOpen" src="../assets/icons/default_folder.svg" alt="folder icon" />
-          <img v-else src="../assets/icons/default_folder_opened.svg" alt="folder icon" />
+          <img :src="getIconUrl(getIcon())" alt="file icon" />
           <span>{{ item.name }}</span>
         </div>
       </ContextMenuTrigger>
@@ -63,7 +82,24 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
             class="ContextMenuItem"
             @click="handleClick"
           >
-            New Tab
+            New File
+            <div class="RightSlot">⌘+T</div>
+          </ContextMenuItem>
+          <ContextMenuItem
+            value="New Tab"
+            class="ContextMenuItem"
+            @click="handleClick"
+          >
+            New Folder
+            <div class="RightSlot">⌘+T</div>
+          </ContextMenuItem>
+           <ContextMenuSeparator class="ContextMenuSeparator" />
+          <ContextMenuItem
+            value="New Tab"
+            class="ContextMenuItem"
+            @click="handleClick"
+          >
+            Delete
             <div class="RightSlot">⌘+T</div>
           </ContextMenuItem>
           <ContextMenuSub>
@@ -71,7 +107,7 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
               value="more toolsz"
               class="ContextMenuSubTrigger"
             >
-              More Tools
+              More
               <div class="RightSlot">Icon</div>
             </ContextMenuSubTrigger>
             <ContextMenuPortal>
@@ -84,157 +120,9 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
                   Save Page As…
                   <div class="RightSlot">⌘+S</div>
                 </ContextMenuItem>
-                <ContextMenuItem class="ContextMenuItem">
-                  Create Shortcut…
-                </ContextMenuItem>
-                <ContextMenuItem class="ContextMenuItem">
-                  Name Window…
-                </ContextMenuItem>
-                <ContextMenuSeparator class="ContextMenuSeparator" />
-                <ContextMenuItem class="ContextMenuItem">
-                  Developer Tools
-                </ContextMenuItem>
               </ContextMenuSubContent>
             </ContextMenuPortal>
           </ContextMenuSub>
-          <ContextMenuItem value="New Window" class="ContextMenuItem">
-            New Window
-            <div class="RightSlot">⌘+N</div>
-          </ContextMenuItem>
-          <ContextMenuItem
-            value="New Private Window"
-            class="ContextMenuItem"
-            disabled
-          >
-            New Private Window
-            <div class="RightSlot">⇧+⌘+N</div>
-          </ContextMenuItem>
-          <ContextMenuSub>
-            <ContextMenuSubTrigger
-              value="more tools"
-              class="ContextMenuSubTrigger"
-            >
-              More Tools
-              <div class="RightSlot">Icon</div>
-            </ContextMenuSubTrigger>
-            <ContextMenuPortal>
-              <ContextMenuSubContent
-                class="ContextMenuSubContent"
-                :side-offset="2"
-                :align-offset="-5"
-              >
-                <ContextMenuItem class="ContextMenuItem">
-                  Save Page As…
-                  <div class="RightSlot">⌘+S</div>
-                </ContextMenuItem>
-                <ContextMenuItem class="ContextMenuItem">
-                  Create Shortcut…
-                </ContextMenuItem>
-                <ContextMenuItem class="ContextMenuItem">
-                  Name Window…
-                </ContextMenuItem>
-                <ContextMenuSeparator class="ContextMenuSeparator" />
-                <ContextMenuItem class="ContextMenuItem">
-                  Developer Tools
-                </ContextMenuItem>
-                <ContextMenuSub>
-                  <ContextMenuSubTrigger
-                    value="more toolsz"
-                    class="ContextMenuSubTrigger"
-                  >
-                    More Tools
-                    <div class="RightSlot">Icon</div>
-                  </ContextMenuSubTrigger>
-                  <ContextMenuPortal>
-                    <ContextMenuSubContent
-                      class="ContextMenuSubContent"
-                      :side-offset="2"
-                      :align-offset="-5"
-                    >
-                      <ContextMenuItem class="ContextMenuItem">
-                        Save Page As…
-                        <div class="RightSlot">⌘+S</div>
-                      </ContextMenuItem>
-                      <ContextMenuItem class="ContextMenuItem">
-                        Create Shortcut…
-                      </ContextMenuItem>
-                      <ContextMenuItem class="ContextMenuItem">
-                        Name Window…
-                      </ContextMenuItem>
-                      <ContextMenuSeparator class="ContextMenuSeparator" />
-                      <ContextMenuItem class="ContextMenuItem">
-                        Developer Tools
-                      </ContextMenuItem>
-                      <ContextMenuSub>
-                        <ContextMenuSubTrigger
-                          value="more toolsz"
-                          class="ContextMenuSubTrigger"
-                        >
-                          More Tools
-                          <div class="RightSlot">Icon</div>
-                        </ContextMenuSubTrigger>
-                        <ContextMenuPortal>
-                          <ContextMenuSubContent
-                            class="ContextMenuSubContent"
-                            :side-offset="2"
-                            :align-offset="-5"
-                          >
-                            <ContextMenuItem class="ContextMenuItem">
-                              Save Page As…
-                              <div class="RightSlot">⌘+S</div>
-                            </ContextMenuItem>
-                            <ContextMenuItem class="ContextMenuItem">
-                              Create Shortcut…
-                            </ContextMenuItem>
-                            <ContextMenuItem class="ContextMenuItem">
-                              Name Window…
-                            </ContextMenuItem>
-                            <ContextMenuSeparator class="ContextMenuSeparator" />
-                            <ContextMenuItem class="ContextMenuItem">
-                              Developer Tools
-                            </ContextMenuItem>
-                          </ContextMenuSubContent>
-                        </ContextMenuPortal>
-                      </ContextMenuSub>
-                    </ContextMenuSubContent>
-                  </ContextMenuPortal>
-                </ContextMenuSub>
-                <ContextMenuItem class="ContextMenuItem">
-                  Developer Tools
-                </ContextMenuItem>
-              </ContextMenuSubContent>
-            </ContextMenuPortal>
-          </ContextMenuSub>
-          <ContextMenuSeparator class="ContextMenuSeparator" />
-          <ContextMenuCheckboxItem v-model="checkboxOne" class="ContextMenuItem">
-            <ContextMenuItemIndicator class="ContextMenuItemIndicator">
-              Icon
-            </ContextMenuItemIndicator>
-            Show Bookmarks
-            <div class="RightSlot">⌘+B</div>
-          </ContextMenuCheckboxItem>
-          <ContextMenuCheckboxItem v-model="checkboxTwo" class="ContextMenuItem">
-            <ContextMenuItemIndicator class="ContextMenuItemIndicator">
-              Icon
-            </ContextMenuItemIndicator>
-            Show Full URLs
-          </ContextMenuCheckboxItem>
-          <ContextMenuSeparator class="ContextMenuSeparator" />
-          <ContextMenuLabel class="ContextMenuLabel"> People </ContextMenuLabel>
-          <ContextMenuRadioGroup v-model="person">
-            <ContextMenuRadioItem class="ContextMenuItem" value="pedro">
-              <ContextMenuItemIndicator class="ContextMenuItemIndicator">
-                Icon
-              </ContextMenuItemIndicator>
-              Pedro Duarte
-            </ContextMenuRadioItem>
-            <ContextMenuRadioItem class="ContextMenuItem" value="colm">
-              <ContextMenuItemIndicator class="ContextMenuItemIndicator">
-                Icon
-              </ContextMenuItemIndicator>
-              Colm Tuite
-            </ContextMenuRadioItem>
-          </ContextMenuRadioGroup>
         </ContextMenuContent>
       </ContextMenuPortal>
     </ContextMenuRoot>
@@ -260,13 +148,13 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
 }
 
 .ContextMenuTrigger {
-  color: white;
+  color: var(--editor-foreground);
   font-size: 15px;
   user-select: none;
   width: 200px;
   height: fit-content;
   text-align: center;
-  background-color: #1e1e1e;
+  background-color: var(--editor-background);
 
   padding: 4px 8px;
 }
@@ -274,7 +162,7 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
 .ContextMenuContent,
 .ContextMenuSubContent {
   min-width: 220px;
-  background-color: #1e1e1e;
+  background-color: var(--editor-background);
   color: white;
   z-index: 1000;
   border-radius: 6px;
@@ -329,7 +217,7 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
 
 .ContextMenuSeparator {
   height: 1px;
-  background-color: var(--grass-6);
+  background-color: #9cdcfe;
   margin: 5px;
 }
 
@@ -355,6 +243,6 @@ import {PhCaretRight, PhCaretDown} from "@phosphor-icons/vue";
 }
 
 .children {
-  margin-left: 1rem;
+  margin-left: 0.5rem;
 }
 </style>

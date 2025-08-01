@@ -1,4 +1,4 @@
-use tree_sitter::Language;
+use tree_sitter::{Language, Point};
 
 pub fn get_language_object(language: &str) -> Language {
     match language {
@@ -69,8 +69,24 @@ pub fn calculate_edit(old_code: &str, new_code: &str) -> Option<tree_sitter::Inp
         start_byte: start,
         old_end_byte: old_end,
         new_end_byte: new_end,
-        start_position: tree_sitter::Point::new(0, 0),
-        old_end_position: tree_sitter::Point::new(0, 0),
-        new_end_position: tree_sitter::Point::new(0, 0),
+        start_position: byte_to_point(old_code, start),
+        old_end_position: byte_to_point(old_code, old_end),
+        new_end_position: byte_to_point(new_code, new_end),
     })
+}
+
+fn byte_to_point(text: &str, byte_offset: usize) -> Point {
+    let mut row = 0;
+    let mut last_newline_byte = 0;
+    for (i, byte) in text.bytes().enumerate() {
+        if i >= byte_offset {
+            break;
+        }
+        if byte == b'\n' {
+            row += 1;
+            last_newline_byte = i + 1;
+        }
+    }
+    let column = byte_offset - last_newline_byte;
+    Point::new(row, column)
 }

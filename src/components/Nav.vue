@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { open } from '@tauri-apps/plugin-dialog';
+import { open } from "@tauri-apps/plugin-dialog";
 import { useEditorStore } from "../stores/editor";
+import { useThemeStore } from "../stores/theme";
 import { invoke } from "@tauri-apps/api/core";
 
 const editor = useEditorStore();
+const theme = useThemeStore();
 
 defineProps<{
     countRef: number;
@@ -26,17 +28,38 @@ async function changeWorkingDirectory() {
     editor.setCurrentDirectory(folder as string);
 }
 
-import {PhFiles, PhGear, PhGitBranch, PhMagnifyingGlass, PhPuzzlePiece, PhFolderOpen} from "@phosphor-icons/vue";
+function changeTheme() {
+    const currentThemeIndex = theme.themes.findIndex(
+        (t) => t.name === theme.currentTheme.name,
+    );
+    const nextThemeIndex = (currentThemeIndex + 1) % theme.themes.length;
+    theme.setTheme(theme.themes[nextThemeIndex].name);
+}
+
+import {
+    PhFiles,
+    PhGear,
+    PhGitBranch,
+    PhMagnifyingGlass,
+    PhPuzzlePiece,
+    PhFolderOpen,
+    PhRobot,
+    PhPaintBrush,
+} from "@phosphor-icons/vue";
 </script>
 
 <template>
     <div class="nav">
-        <button @click="changePage(0)"><PhFiles size="20"/></button>
-        <button @click="changePage(1)"><PhMagnifyingGlass size="20"/></button>
-        <button @click="changePage(2)"><PhGitBranch size="20"/></button>
-        <button @click="changePage(3)"><PhPuzzlePiece size="20"/></button>
-        <button @click="changePage(4)"><PhGear size="20"/></button>
-        <button @click="changeWorkingDirectory"><PhFolderOpen size="20"/></button>
+        <button @click="changePage(0)"><PhFiles size="20" /></button>
+        <button @click="changePage(1)"><PhMagnifyingGlass size="20" /></button>
+        <button @click="changePage(2)"><PhGitBranch size="20" /></button>
+        <button @click="changePage(3)"><PhPuzzlePiece size="20" /></button>
+        <button @click="changePage(4)"><PhGear size="20" /></button>
+        <button @click="changePage(5)"><PhRobot size="20" /></button>
+        <button @click="changeWorkingDirectory">
+            <PhFolderOpen size="20" />
+        </button>
+        <button @click="changeTheme"><PhPaintBrush size="20" /></button>
     </div>
 </template>
 
@@ -47,19 +70,16 @@ import {PhFiles, PhGear, PhGitBranch, PhMagnifyingGlass, PhPuzzlePiece, PhFolder
     flex: 0 0 40px;
     max-width: 40px;
     min-width: 40px;
-    background: #1e1e1e;
-    color: white;
+    background: var(--activityBar-background);
+    color: var(--editor-foreground);
     max-height: 100vh;
     overflow: hidden;
 }
 .nav button {
-    background: #1e1e1e;
+    background: transparent;
     border: none;
-    color: white;
+    color: var(--editor-foreground);
     padding: 10px;
     cursor: pointer;
-}
-.nav button:hover {
-    background: #2d2d2d;
 }
 </style>

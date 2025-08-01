@@ -1,5 +1,6 @@
 use std::{fmt::Write, path::PathBuf, sync::{Arc, Mutex}, time::SystemTime};
 
+use notify::RecommendedWatcher;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,9 +32,30 @@ pub struct Editor {
     pub folders_opened: Vec<PathBuf>,
     pub current_file: Option<File>,
     pub files: Vec<File>,
-    //#[serde(skip_serializing, skip_deserializing)]
-    //watcher: Option<Box<dyn Watcher>>,
+    #[serde(skip_serializing, skip_deserializing)]
+    pub watcher:  Option<FileWatcher>,
+    #[serde(skip_serializing, skip_deserializing)]
+    pub git:  Option<Git>,
 }
+
+pub struct Git {
+    pub current_directory: PathBuf
+}
+
+pub struct FileWatcher {
+    pub watcher: Option<RecommendedWatcher>,
+    pub current_directory: PathBuf,
+}
+
+impl Default for FileWatcher {
+    fn default() -> Self {
+        FileWatcher {
+            watcher: None,
+            current_directory: PathBuf::new(),
+        }
+    }
+}
+
 
 pub struct Terminal {
     pub writer: Option<Arc<Mutex<Box<dyn std::io::Write + Send + 'static>>>>,
