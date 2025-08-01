@@ -1,6 +1,7 @@
 export const dark = {
   name: "dark",
   colors: {
+    "token.type": "#9cdcfe",
     "token.identifier": "#9cdcfe",
     "token.shorthand_property_identifier_pattern": "#9cdcfe",
     "token.type_identifier": "#4ec9b0",

@@ -13,7 +13,7 @@ const terminalContainer = ref();
 let term: Terminal;
 
 onMounted(async () => {
-  term = new Terminal({ cols: 100, rows: 30 , theme: { background: 'transparent'}});
+  term = new Terminal({ cols: 100, rows: 10 , theme: { background: '#000', foreground: '#fff' }});
   term.open(terminalContainer.value);
 
   // Start backend PTY
